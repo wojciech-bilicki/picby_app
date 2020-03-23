@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   View,
   Image,
   Dimensions,
+  BackHandler,
 } from 'react-native';
 import PicbyLogo from '../../common/images/PICBY.svg';
 import eyePic from '../../common/images/bigEye.png';
@@ -29,6 +30,12 @@ const Introduction: React.FC<Props> = ({
   navigation,
 }) => {
   const {registerText, loginText, textColorWhite} = buttonsData;
+
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', () => true);
+    return BackHandler.removeEventListener('hardwareBackPress', () => true);
+  }, []);
+
   const navigateToOtherScreen = (screenName: string) => {
     navigation.navigate({routeName: screenName});
   };

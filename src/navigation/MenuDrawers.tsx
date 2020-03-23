@@ -17,6 +17,7 @@ import {globalStyles} from '../common/styles/globalStyles';
 import {createDrawerNavigator} from 'react-navigation-drawer';
 import {menuColors} from '../staticData/staticData';
 import IntroductionSceneStack from '../views/intruduction/introductionScene';
+import ChangeUserStackNav from '../views/changeUserMode/changeUserModeStack';
 
 const {width: vw} = Dimensions.get('window');
 const {RED_COLOR, YELLOW_COLOR} = menuColors;
@@ -34,41 +35,50 @@ export const passIconElement = (
 
 export const ParentDrawer = createDrawerNavigator(
   {
-    'PANEL DZIECKA': {
-      screen: DashboardStackNav,
+    KidPanel: {
+      screen: ChangeUserStackNav,
       navigationOptions: {
         drawerIcon: () => passIconElement(<KidIcon />, RED_COLOR),
+        drawerLabel: 'PANEL DZIECKA',
       },
     },
-    'KATALOGI ': {
+    Catalogs: {
       screen: CatalogsStackNav,
       navigationOptions: {
         drawerIcon: () => passIconElement(<CatalogIcon />, YELLOW_COLOR),
+        drawerLabel: 'KATALOGI',
       },
     },
-    'NAGRANIA GŁOSOWE': {
+    VoiceRecords: {
       screen: VoiceRecordsStackNav,
       navigationOptions: {
         drawerIcon: () => passIconElement(<VoiceIcon />, YELLOW_COLOR),
+        drawerLabel: 'NAGRANIA GŁOSOWE',
       },
     },
-    'USTAWIENIA ': {
+    Settings: {
       screen: SettingsStackNav,
       navigationOptions: {
         drawerIcon: () => passIconElement(<SettingsIcon />, YELLOW_COLOR),
+        drawerLabel: 'USTAWIENIA',
       },
     },
-    'O APLIKACJI': {
+    AboutApp: {
       screen: AboutStackNav,
       navigationOptions: {
         drawerIcon: () => passIconElement(<AboutIcon />, YELLOW_COLOR),
+        drawerLabel: 'O APLIKACJI',
       },
     },
-    'POLITYKA PRYWATNOŚCI': {
+    PrivacyPolicy: {
       screen: PrivacyStackNav,
       navigationOptions: {
         drawerIcon: () => passIconElement(<PrivacyIcon />, YELLOW_COLOR),
+        drawerLabel: 'POLITYKA PRYWATNOŚCI',
       },
+    },
+    FirstLogin: {
+      screen: DashboardStackNav,
     },
   },
   {

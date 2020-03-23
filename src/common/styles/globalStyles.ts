@@ -1,4 +1,7 @@
 import {StyleSheet, Dimensions} from 'react-native';
+import {StatusBar} from 'react-native';
+
+const statusBarHeight = StatusBar.currentHeight;
 
 const {width: vw, height: vh} = Dimensions.get('window');
 
@@ -7,9 +10,10 @@ export const globalStyles = StyleSheet.create({
     flex: 1,
   },
   screenWrapper: {
+    flex: 1,
     alignItems: 'center',
     backgroundColor: '#fff',
-    minHeight: vh,
+    minHeight: statusBarHeight && vh - statusBarHeight,
   },
   errorTextWrapper: {
     marginTop: 3,
@@ -27,7 +31,7 @@ export const globalStyles = StyleSheet.create({
   },
   errorText: {
     color: '#CC1919',
-    letterSpacing: 0.3,
+    letterSpacing: 0.1,
     fontSize: 14,
   },
   emailLogo: {

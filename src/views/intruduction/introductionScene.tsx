@@ -1,12 +1,11 @@
 import React from 'react';
 import {View} from 'react-native';
-import {useContext} from 'react';
 import {createBottomTabNavigator} from 'react-navigation-tabs';
 import Introduction from './introductionSingleView';
-import {IntroductionContext} from './introductionContext';
 import CustomBottomTab from './customBottomTab';
 import {NavigationStackProp} from 'react-navigation-stack';
 import {introductionTextContent} from '../../staticData/staticData';
+import {useStoreState} from '../../easyPeasy/hooks';
 
 type Props = {
   navigation: NavigationStackProp;
@@ -39,7 +38,7 @@ const secondView: React.FC<Props> = ({navigation}) => {
   );
 };
 const thirdView: React.FC<Props> = ({navigation}) => {
-  const {activeScreenNumber} = useContext(IntroductionContext);
+  const {activeScreenNumber} = useStoreState(state => state.IntroductionModel);
   const {thirdScreenTitle} = introductionTextContent;
 
   return (

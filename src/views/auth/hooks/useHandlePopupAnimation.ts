@@ -1,8 +1,9 @@
 import {Dimensions, Animated} from 'react-native';
-import {useState, useContext} from 'react';
-import {AuthContext} from '../authContext';
+import {useState} from 'react';
 
 const {width: vw} = Dimensions.get('window');
+
+export const ENABLE_BUTTONS_DELAY_TIME = 4600;
 
 export const useHandlePopupAnimation = () => {
   const [fadeAnim] = useState(new Animated.Value(-1 * vw));
@@ -11,15 +12,9 @@ export const useHandlePopupAnimation = () => {
   const ANIMATION_DURATION = 300;
   const ANIMATION_SHORT_DELAY = 300;
   const ANIMATION_LONG_DELAY = 4000;
-  const {
-    loginContextData: {setAreButtonsDisabled},
-    registerContextData: {setAreRegisterButtonsDisabled},
-  } = useContext(AuthContext);
 
   const handlePopUpAnimation = (redirectFunction?: () => void | undefined) => {
     const functionFiredAfterAnimationEnds = () => {
-      setAreButtonsDisabled(false);
-      setAreRegisterButtonsDisabled(false);
       redirectFunction && redirectFunction();
     };
 

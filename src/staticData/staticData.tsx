@@ -11,17 +11,19 @@ export const registerMessages = {
 export const loginMessages = {
   messageEmailConfirmation: `E-mail został potwierdzony,${'\n'}możesz się zalogować.`,
   messageLoginSuccess: `Logowanie pomyślne,${'\n'} nastąpi przekierowanie`,
-  messageBadPassword: 'Hasło jest nieprawidłowe',
+  messageBadPassword: 'Email lub hasło jest nieprawidłowe',
   messageBadEmail: 'Wprowadź poprawny adres e-mail.',
   forgotPasswordText: 'Zapomniałeś hasła?',
   messageServerError: 'Błąd serwera',
+  messageUserNotConfirmed: `Konto nie zostało potwierdzone ${'\n'} Sprawdź skrzynkę odbiorczą.`,
 };
 
 export const forgotPasswordMessages = {
   messageBadMail: 'Wprowadź poprawny adres e-mail.',
   messageEmailNotFound: 'Podany adres e-mail nie istnieje w bazie',
-  popUpText: `Przypomnienie zostało wysłane.${'\n'} Sprawdź skrzynkę odbiorczą.`,
+  messageSendSuccess: `Przypomnienie zostało wysłane.${'\n'} Sprawdź skrzynkę odbiorczą.`,
   contentText: `Wprowadź swój adres e-mail ${'\n'} żeby zresetować hasło.`,
+  messageServerError: 'Błąd serwera',
   contentHeader: 'ZAPOMNIAŁEŚ HASŁA?',
 };
 
@@ -63,4 +65,27 @@ export const introductionTextContent = {
 export const menuColors = {
   RED_COLOR: '#EB5F34',
   YELLOW_COLOR: '#FBB114',
+};
+
+export const firstLoginDashboard = {
+  buttonText: 'USTAWIENIA KONTA',
+  headerText: 'WITAJ W APLIKACJI',
+  subtitle: `Aby rozpocząć korzystanie z aplikacji, ${'\n'} przejdź do ustawień konta.`,
+  contentText: `Wszystkie zmiany możesz edytować ${'\n'} w dowolnym momencie.${'\n'}Ustawienia zawsze znajdziesz${'\n'} w menu głównym.`,
+};
+
+export const commonColors = {
+  orangeRed: '#EB5F34',
+  lightBlue: 'rgba(7, 71, 130, 0.68)',
+  darkRed: '#CC1919',
+};
+
+export const catalogsData = {
+  title: 'Brak katalogów w PICBY.',
+  subtitle: `Nie utworzyłeś jeszcze żadnego katalogu. ${'\n'} Kliknij w ikonę plusa z prawej strony,${'\n'} aby dodać pierwszy katalog.`,
+};
+
+export const userLoginErrorCodes = {
+  badEmailOrPasswordCode: '100',
+  userNotConfirmedCode: '101',
 };

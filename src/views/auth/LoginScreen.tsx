@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useContext, useState} from 'react';
+import {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -7,33 +7,49 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
 } from 'react-native';
-import {TextInput, TouchableOpacity} from 'react-native-gesture-handler';
+import {
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native-gesture-handler';
 import {Formik} from 'formik';
 import * as yup from 'yup';
-
+import {dismissKeyboard} from '../../common/utils.global';
 import {globalStyles} from '../../common/styles/globalStyles';
-import {AuthContext} from './authContext';
 import GotAccountQuestion from './components/GotAccountQuestion';
 import FlatButton from '../../common/components/Button';
 import PicbyLogo from '../../common/images/PICBY.svg';
 import EmailLogo from './icons/envelope.svg';
 import KeyLogo from './icons/key.svg';
 import ErrorLogo from './icons/exclamationMark.svg';
-import {useHandlePopupAnimation} from './hooks/useHandlePopupAnimation';
+import {
+  useHandlePopupAnimation,
+  ENABLE_BUTTONS_DELAY_TIME,
+} from './hooks/useHandlePopupAnimation';
 import PopUp from '../auth/components/Popup';
 import {
   introHeaderText,
   buttonsData,
   inputData,
   loginMessages,
+  userLoginErrorCodes,
 } from '../../staticData/staticData';
 import {NavigationStackProp} from 'react-navigation-stack';
+import {useStoreState, useStoreActions} from '../../easyPeasy/hooks';
+import {useMutation} from '@apollo/react-hooks';
+import {LOGIN_USER, CONFIRM_USER} from '../../apollo/mutations/mutations';
 
 const {width: vw} = Dimensions.get('window');
 
 type LoginScreenProps = {
   navigation: NavigationStackProp;
 };
+
+interface handleLoginRequest {
+  email: string;
+  password: string;
+  resetForm: () => void;
+}
 
 interface CredentialTypes {
   email: string;
@@ -44,22 +60,86 @@ interface ActionTypes {
   resetForm: () => void;
 }
 
+type userTokenType = string | undefined;
+
 const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
   const {navigate} = navigation;
+  const {badEmailOrPasswordCode, userNotConfirmedCode} = userLoginErrorCodes;
+
+  useEffect(() => {
+    navigation.addListener('didBlur', () => setLoginScreenStateToDefault(true));
+  }, []);
+  const {
+    setIsUserNotConfirmed,
+    setIsServerNotResponding,
+    setIsLoginSuccess,
+    setIsPasswordBad,
+    setAreLoginButtonsDisabled,
+    setIsUserConfirmedSuccess,
+    setLoginScreenStateToDefault,
+    setMessagePopUpText,
+  } = useStoreActions(actions => actions.LoginModel);
 
   const {
-    loginContextData: {
-      isLoginSuccess,
-      isServerNotResponding,
-      isPasswordBad,
-      isUserLoggedInFirstTime,
-      handleLoginRequestAndErrors,
-      setIsPasswordBad,
-      areButtonsDisabled,
-      setAreButtonsDisabled,
+    isLoginSuccess,
+    isServerNotResponding,
+    isPasswordBad,
+    isUserLoggedInFirstTime,
+    isUserConfirmedSuccess,
+    isUserNotConfirmed,
+    areLoginButtonsDisabled,
+    messagePopUpText,
+  } = useStoreState(state => state.LoginModel);
+
+  const handleLoginRequestAndErrors = async ({
+    email,
+    password,
+    resetForm,
+  }: handleLoginRequest) => {
+    try {
+      setAreLoginButtonsDisabled(true);
+      await setIsServerNotResponding(false);
+      await loginGraphQLQuery({email, password});
+      setIsLoginSuccess(true);
+      resetForm();
+    } catch (error) {
+      let errorCode = error.message;
+      if (errorCode == badEmailOrPasswordCode) {
+        setIsPasswordBad(true);
+      } else if (errorCode == userNotConfirmedCode) {
+        setIsUserNotConfirmed(true);
+      } else setIsServerNotResponding(true);
+    } finally {
+      setIsLoginSuccess(false);
+      setIsServerNotResponding(false);
+      setIsUserNotConfirmed(false);
+      setTimeout(
+        () => setAreLoginButtonsDisabled(false),
+        ENABLE_BUTTONS_DELAY_TIME,
+      );
+    }
+  };
+
+  const [loginUser] = useMutation(LOGIN_USER, {
+    onError: errorData => {
+      const [extensions] = errorData.graphQLErrors;
+      const errorString = extensions.message;
+      throw new Error(errorString);
     },
-    dismissKeyboard,
-  } = useContext(AuthContext);
+    onCompleted: data => {
+      console.log(data.login.id);
+    },
+  });
+
+  const loginGraphQLQuery = async ({email, password}: CredentialTypes) => {
+    const emailLowerCase = email.toLowerCase();
+
+    try {
+      await loginUser({variables: {email: emailLowerCase, password}});
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
 
   const {loginHeaderTextTwo, loginHeaderTextOne} = introHeaderText;
 
@@ -69,10 +149,14 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     messageLoginSuccess,
     forgotPasswordText,
     messageServerError,
+    messageEmailConfirmation,
+    messageUserNotConfirmed,
   } = loginMessages;
 
   const {placeholderTextBlueColor} = inputData;
-  const [messagePopUpText, setMessagePopUpText] = useState('');
+  const [userTokenValue, setUserTokenValue] = useState<userTokenType>(
+    undefined,
+  );
 
   const {
     loginText,
@@ -89,51 +173,119 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     password: yup.string().required(),
   });
 
-  // handle errors //
-  React.useEffect(() => {
+  useEffect(() => {
+    const userToken: userTokenType = navigation.getParam('token');
+    userToken && setUserTokenValue(userToken);
+  });
+
+  useEffect(() => {
+    userTokenValue && handleConfirmUserAndHandleErrors(userTokenValue);
+  }, [userTokenValue]);
+
+  // handle errors // podzielic na kilka useeffect
+  useEffect(() => {
     if (isServerNotResponding) {
       setMessagePopUpText(messageServerError);
       handlePopUpAnimation();
-    } else if (isLoginSuccess) {
+    } else if (isLoginSuccess && isUserLoggedInFirstTime) {
+      setMessagePopUpText(messageLoginSuccess);
+      handlePopUpAnimation(redirectToFirstLoginDashboard);
+    } else if (isLoginSuccess && !isUserLoggedInFirstTime) {
       setMessagePopUpText(messageLoginSuccess);
       handlePopUpAnimation(redirectToDashboard);
+    } else if (isUserConfirmedSuccess) {
+      setMessagePopUpText(messageEmailConfirmation);
+      handlePopUpAnimation();
+    } else if (isUserNotConfirmed) {
+      setMessagePopUpText(messageUserNotConfirmed);
+      handlePopUpAnimation();
     }
-  }, [isLoginSuccess, isServerNotResponding, isPasswordBad]);
+  }, [
+    isLoginSuccess,
+    isServerNotResponding,
+    isPasswordBad,
+    isUserLoggedInFirstTime,
+    isUserConfirmedSuccess,
+    isUserNotConfirmed,
+  ]);
+
+  const redirectToFirstLoginDashboard = () => {
+    navigation.dangerouslyGetParent()?.navigate('FirstLogin');
+  };
 
   const redirectToDashboard = () => {
-    navigation.dangerouslyGetParent()?.navigate('ParentDashboard');
+    navigation.dangerouslyGetParent()?.navigate('Catalogs');
   };
+
   const {handlePopUpAnimation, fadeAnim} = useHandlePopupAnimation();
+
   const sendLoginRequest = async (
     values: CredentialTypes,
     actions: ActionTypes,
   ) => {
     const {email, password} = values;
     const {resetForm} = actions;
-    await handleLoginRequestAndErrors(email, password, resetForm);
+    await handleLoginRequestAndErrors({email, password, resetForm});
+  };
+
+  const [confirmUser] = useMutation(CONFIRM_USER, {
+    onError: errorData => {
+      const [extensions] = errorData.graphQLErrors;
+      const errorCode = extensions?.extensions?.exception.code;
+      throw new Error(errorCode);
+    },
+    onCompleted: returnedData => {
+      console.log(returnedData);
+    },
+  });
+
+  const confirmUserRequest = async (userToken: string) => {
+    try {
+      await confirmUser({variables: {token: userToken}});
+    } catch (error) {
+      throw new Error(error);
+    }
+  };
+
+  const handleConfirmUserAndHandleErrors = async (userToken: string) => {
+    try {
+      setAreLoginButtonsDisabled(true);
+      await setIsServerNotResponding(false);
+      await confirmUserRequest(userToken);
+      setIsUserConfirmedSuccess(true);
+    } catch (error) {
+      setIsServerNotResponding(true);
+    } finally {
+      setIsServerNotResponding(false);
+      setTimeout(
+        () => setAreLoginButtonsDisabled(false),
+        ENABLE_BUTTONS_DELAY_TIME,
+      );
+    }
   };
 
   return (
-    <TouchableWithoutFeedback onPress={dismissKeyboard}>
-      <View style={globalStyles.screenWrapper}>
-        <PopUp popUpText={messagePopUpText} fadeAnim={fadeAnim} />
-        <View style={styles.gotAccountQuestion}>
-          <GotAccountQuestion
-            questionText={loginHeaderTextTwo}
-            actionText={loginHeaderTextOne}
-            onPress={() => navigate('Register')}
-          />
-        </View>
-        <PicbyLogo style={styles.logo} />
-        <View>
-          <Formik
-            validationSchema={reviewSchema}
-            initialValues={{email: '', password: ''}}
-            onSubmit={(values, actions) => {
-              sendLoginRequest(values, actions);
-            }}>
-            {formikProps => {
-              return (
+    <ScrollView>
+      <TouchableWithoutFeedback onPress={dismissKeyboard}>
+        <View style={globalStyles.screenWrapper}>
+          <PopUp popUpText={messagePopUpText} fadeAnim={fadeAnim} />
+          <View style={styles.gotAccountQuestion}>
+            <GotAccountQuestion
+              questionText={loginHeaderTextTwo}
+              actionText={loginHeaderTextOne}
+              onPress={() => navigate('Register')}
+            />
+          </View>
+          <PicbyLogo style={styles.logo} />
+          <View>
+            <Formik
+              enableReinitialize={true}
+              validationSchema={reviewSchema}
+              initialValues={{email: '', password: ''}}
+              onSubmit={(values, actions) => {
+                sendLoginRequest(values, actions);
+              }}>
+              {formikProps => (
                 <View>
                   <View style={styles.inputWrapper}>
                     <EmailLogo style={globalStyles.emailLogo} />
@@ -170,7 +322,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
                       onFocus={() => {
                         if (isPasswordBad) {
                           setIsPasswordBad(false);
-                          setAreButtonsDisabled(false);
+                          setAreLoginButtonsDisabled(false);
                         }
                       }}
                     />
@@ -183,14 +335,15 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
                       {isPasswordBad && messageBadPassword}
                     </Text>
                   </View>
+
                   <View style={styles.googleButtonWrapper}>
                     <FlatButton
-                      onPress={() => redirectToDashboard()}
+                      onPress={formikProps.handleSubmit}
                       colorVariantIndex={1}
                       textValue={loginWithGoogle}
                       textColor={textColorBlue}
                       icon={true}
-                      disabled={areButtonsDisabled}
+                      disabled={areLoginButtonsDisabled}
                       googleButton={true}
                     />
                   </View>
@@ -199,18 +352,18 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
                     colorVariantIndex={0}
                     textValue={loginText}
                     textColor={textColorWhite}
-                    disabled={areButtonsDisabled}
+                    disabled={areLoginButtonsDisabled}
                   />
                 </View>
-              );
-            }}
-          </Formik>
+              )}
+            </Formik>
+          </View>
+          <TouchableOpacity onPress={() => navigate('ForgotPass')}>
+            <Text style={styles.forgotPassword}>{forgotPasswordText}</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={() => navigate('ForgotPass')}>
-          <Text style={styles.forgotPassword}>{forgotPasswordText}</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+    </ScrollView>
   );
 };
 const styles = StyleSheet.create({

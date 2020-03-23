@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, StyleSheet, ScrollView, Text, Dimensions} from 'react-native';
 import {
   DrawerNavigatorItems,
@@ -10,14 +10,29 @@ import {globalStyles} from '../common/styles/globalStyles';
 import {menuColors} from '../staticData/staticData';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import Header from './Header';
+import {NavigationRoute, NavigationParams} from 'react-navigation';
+import {omitNavItems} from './nav.utils';
 
 const {YELLOW_COLOR} = menuColors;
 const {width: vw} = Dimensions.get('window');
+const OMIT_NAV_KEY = 'FirstLogin';
 
 const Sidebar = (
   props: React.PropsWithChildren<DrawerContentComponentProps>,
 ) => {
-  const {navigation} = props;
+  const {navigation, items} = props;
+  const [desiredDrawerItems, setDesiredDrawerItems] = useState<
+    NavigationRoute<NavigationParams>[]
+  >(items);
+
+  useEffect(() => {
+    const navItemsAfterFilter = omitNavItems({
+      navItems: items,
+      omitNavKey: OMIT_NAV_KEY,
+    });
+    setDesiredDrawerItems(navItemsAfterFilter);
+  }, []);
+
   return (
     <View>
       <Header
@@ -28,7 +43,7 @@ const Sidebar = (
       />
       <ScrollView>
         <View style={styles.liWrapper}>
-          <DrawerNavigatorItems {...props} />
+          <DrawerNavigatorItems {...props} items={desiredDrawerItems} />
         </View>
         <TouchableOpacity style={styles.elementWrapper}>
           <View

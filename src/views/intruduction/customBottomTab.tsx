@@ -1,9 +1,9 @@
-import React, {useContext, ReactNode} from 'react';
+import React from 'react';
 import {StyleSheet, View, TouchableOpacity, Dimensions} from 'react-native';
 import ClosedEye from './images/eyeClosed.svg';
 import OpenEye from './images/eyeOpen.svg';
-import {IntroductionContext} from './introductionContext';
 import {NavigationStackProp} from 'react-navigation-stack';
+import {useStoreState, useStoreActions} from '../../easyPeasy/hooks';
 
 let {width: vw} = Dimensions.get('window');
 
@@ -15,8 +15,9 @@ type Props = {
   navigation: NavigationStackProp;
 };
 const CustomBottomTab: React.FC<Props> = ({navigation: {navigate}}) => {
-  const {activeScreenNumber, setActiveScreenNumber} = useContext(
-    IntroductionContext,
+  const {activeScreenNumber} = useStoreState(state => state.IntroductionModel);
+  const {changeActiveScreenNumber} = useStoreActions(
+    actions => actions.IntroductionModel,
   );
 
   const EyeComponent: React.FC<EyeComponentProps> = ({
@@ -25,7 +26,7 @@ const CustomBottomTab: React.FC<Props> = ({navigation: {navigate}}) => {
   }) => {
     const navigateToOtherScreen = () => {
       navigate(screenOrder);
-      setActiveScreenNumber(screenNumber);
+      changeActiveScreenNumber(screenNumber);
     };
     return (
       <TouchableOpacity onPress={navigateToOtherScreen}>

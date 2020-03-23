@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
       width: 1,
       height: 1,
     },
-    elevation: 2,
+    elevation: 1,
     shadowOpacity: 0.12,
   },
   buttonText: {

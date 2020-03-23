@@ -46,6 +46,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#3180AE',
     padding: 0,
+    shadowOffset: {
+      width: 4,
+      height: 4,
+    },
+    shadowColor: 'rgba(0, 0, 0, 0.12)',
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 4,
   },
   headerText: {
     fontWeight: '600',
