@@ -38,6 +38,10 @@ import {NavigationStackProp} from 'react-navigation-stack';
 import {useStoreState, useStoreActions} from '../../easyPeasy/hooks';
 import {useMutation} from '@apollo/react-hooks';
 import {LOGIN_USER, CONFIRM_USER} from '../../apollo/mutations/mutations';
+import {
+  getUserTokenFromAsyncStorage,
+  saveUserTokenInAsyncStorage,
+} from '../../easyPeasy/auth/login/utils';
 
 const {width: vw} = Dimensions.get('window');
 
@@ -126,8 +130,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
       const errorString = extensions.message;
       throw new Error(errorString);
     },
-    onCompleted: data => {
+    onCompleted: async data => {
       console.log(data.login.id);
+      const userToken = data.login.id;
+      const tokenFromStorage = await getUserTokenFromAsyncStorage();
+      console.log(tokenFromStorage);
+      !tokenFromStorage && saveUserTokenInAsyncStorage(userToken);
     },
   });
 

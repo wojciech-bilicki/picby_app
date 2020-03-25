@@ -141,7 +141,9 @@ const RegisterScreen: React.FC<NavTypes> = ({navigation}) => {
   const [registerUser, {error}] = useMutation(REGISTER_USER, {
     onError: errorData => {
       const [extensions] = errorData.graphQLErrors;
+      console.log(extensions);
       const errorCode = extensions.extensions?.exception.code;
+      console.log(errorCode);
       throw new Error(errorCode);
     },
     onCompleted: data => {
