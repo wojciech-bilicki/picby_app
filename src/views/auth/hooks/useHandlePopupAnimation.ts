@@ -14,6 +14,7 @@ export const useHandlePopupAnimation = () => {
   const ANIMATION_LONG_DELAY = 4000;
 
   const handlePopUpAnimation = (redirectFunction?: () => void | undefined) => {
+    console.log('animacja odpalona');
     const functionFiredAfterAnimationEnds = () => {
       redirectFunction && redirectFunction();
     };
