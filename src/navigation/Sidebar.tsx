@@ -12,6 +12,9 @@ import {TouchableOpacity} from 'react-native-gesture-handler';
 import Header from './Header';
 import {NavigationRoute, NavigationParams} from 'react-navigation';
 import {omitNavItems} from './nav.utils';
+import {useMutation} from '@apollo/react-hooks';
+import {LOGOUT_USER} from '../apollo/mutations/mutations';
+import client from '../../apollo.config';
 
 const {YELLOW_COLOR} = menuColors;
 const {width: vw} = Dimensions.get('window');
@@ -32,6 +35,24 @@ const Sidebar = (
     });
     setDesiredDrawerItems(navItemsAfterFilter);
   }, []);
+  const navigateToOtherScreen = (screenName: string) => {
+    navigation.navigate({routeName: screenName});
+  };
+  const [logout] = useMutation(LOGOUT_USER, {
+    onError: errorData => {
+      console.log(errorData);
+      const [extensions] = errorData.graphQLErrors;
+      const errorString = extensions?.message;
+      throw new Error(errorString);
+    },
+    onCompleted: data => {
+      client.cache.reset();
+      navigateToOtherScreen('Intro');
+    },
+  });
+  const handlePressLogout = () => {
+    logout();
+  };
 
   return (
     <View>
@@ -45,7 +66,9 @@ const Sidebar = (
         <View style={styles.liWrapper}>
           <DrawerNavigatorItems {...props} items={desiredDrawerItems} />
         </View>
-        <TouchableOpacity style={styles.elementWrapper}>
+        <TouchableOpacity
+          style={styles.elementWrapper}
+          onPress={handlePressLogout}>
           <View
             style={[globalStyles.menuIcon, {backgroundColor: YELLOW_COLOR}]}>
             <LogoutIcon />

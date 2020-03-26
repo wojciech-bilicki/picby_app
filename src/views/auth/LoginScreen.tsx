@@ -42,6 +42,8 @@ import {
   getUserTokenFromAsyncStorage,
   saveUserTokenInAsyncStorage,
 } from '../../easyPeasy/auth/login/utils';
+import client from '../../../apollo.config';
+import {ME_QUERY} from '../../apollo/queries/queries';
 
 const {width: vw} = Dimensions.get('window');
 
@@ -88,7 +90,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     isLoginSuccess,
     isServerNotResponding,
     isPasswordBad,
-    isUserLoggedInFirstTime,
     isUserConfirmedSuccess,
     isUserNotConfirmed,
     areLoginButtonsDisabled,
@@ -129,13 +130,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
       const [extensions] = errorData.graphQLErrors;
       const errorString = extensions.message;
       throw new Error(errorString);
-    },
-    onCompleted: async data => {
-      console.log(data.login.id);
-      const userToken = data.login.id;
-      const tokenFromStorage = await getUserTokenFromAsyncStorage();
-      console.log(tokenFromStorage);
-      !tokenFromStorage && saveUserTokenInAsyncStorage(userToken);
     },
   });
 
@@ -195,12 +189,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     if (isServerNotResponding) {
       setMessagePopUpText(messageServerError);
       handlePopUpAnimation();
-    } else if (isLoginSuccess && isUserLoggedInFirstTime) {
+    } else if (isLoginSuccess) {
       setMessagePopUpText(messageLoginSuccess);
       handlePopUpAnimation(redirectToFirstLoginDashboard);
-    } else if (isLoginSuccess && !isUserLoggedInFirstTime) {
-      setMessagePopUpText(messageLoginSuccess);
-      handlePopUpAnimation(redirectToDashboard);
     } else if (isUserConfirmedSuccess) {
       setMessagePopUpText(messageEmailConfirmation);
       handlePopUpAnimation();
@@ -212,7 +203,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     isLoginSuccess,
     isServerNotResponding,
     isPasswordBad,
-    isUserLoggedInFirstTime,
     isUserConfirmedSuccess,
     isUserNotConfirmed,
   ]);
@@ -241,9 +231,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
       const [extensions] = errorData.graphQLErrors;
       const errorCode = extensions?.extensions?.exception.code;
       throw new Error(errorCode);
-    },
-    onCompleted: returnedData => {
-      console.log(returnedData);
     },
   });
 
