@@ -10,6 +10,9 @@ import {
 import PicbyLogo from '../../common/images/PICBY.svg';
 import {NavigationStackProp} from 'react-navigation-stack';
 import {getUserTokenFromAsyncStorage} from '../../easyPeasy/auth/login/utils';
+import {useQuery} from '@apollo/react-hooks';
+import {ME_QUERY} from '../../apollo/queries/queries';
+import {useStoreActions} from '../../easyPeasy/hooks';
 
 const {width: vw} = Dimensions.get('window');
 
@@ -21,17 +24,15 @@ const LoadingScreen: React.FC<Props> = ({navigation}) => {
   const navigateToOtherScreen = (screenName: string) => {
     navigation.navigate({routeName: screenName});
   };
-  useEffect(() => {
-    const userToken = getUserTokenFromAsyncStorage();
-    setTimeout(() => {
-      if (!userToken) {
-        navigateToOtherScreen('Login');
-      } else {
-        navigateToOtherScreen('Intro');
-      }
-    }, 300);
-  }, []);
-
+  const {loading, error, data} = useQuery(ME_QUERY, {
+    onCompleted: data => {
+      const userId = data.me;
+      console.log(loading, error, data);
+      userId
+        ? navigateToOtherScreen('Catalogs')
+        : navigateToOtherScreen('Intro');
+    },
+  });
   return (
     <ScrollView>
       <View style={styles.container}>
