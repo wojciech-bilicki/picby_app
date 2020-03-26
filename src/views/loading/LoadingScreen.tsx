@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -9,10 +9,9 @@ import {
 } from 'react-native';
 import PicbyLogo from '../../common/images/PICBY.svg';
 import {NavigationStackProp} from 'react-navigation-stack';
-import {getUserTokenFromAsyncStorage} from '../../easyPeasy/auth/login/utils';
 import {useQuery} from '@apollo/react-hooks';
 import {ME_QUERY} from '../../apollo/queries/queries';
-import {useStoreActions} from '../../easyPeasy/hooks';
+import client from '../../../apollo.config';
 
 const {width: vw} = Dimensions.get('window');
 
@@ -24,13 +23,18 @@ const LoadingScreen: React.FC<Props> = ({navigation}) => {
   const navigateToOtherScreen = (screenName: string) => {
     navigation.navigate({routeName: screenName});
   };
-  const {loading, error, data} = useQuery(ME_QUERY, {
-    onCompleted: data => {
+  const {error, data} = useQuery(ME_QUERY, {
+    onError: () => {
+      console.log(error);
+    },
+    onCompleted: () => {
       const userId = data.me;
-      console.log(loading, error, data);
-      userId
-        ? navigateToOtherScreen('Catalogs')
-        : navigateToOtherScreen('Intro');
+      if (userId) {
+        navigateToOtherScreen('Catalogs');
+      } else {
+        client.cache.reset();
+        navigateToOtherScreen('Intro');
+      }
     },
   });
   return (

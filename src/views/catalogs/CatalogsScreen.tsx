@@ -6,22 +6,20 @@ import {globalStyles} from '../../common/styles/globalStyles';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import PlusIcon from '../../common/icons/plus.svg';
 import {useQuery} from '@apollo/react-hooks';
-import {HELLO_QUERY, ME_QUERY} from '../../apollo/queries/queries';
-import client from '../../../apollo.config';
+import {ME_QUERY} from '../../apollo/queries/queries';
 const {darkRed, lightBlue, orangeRed} = commonColors;
 const {width: vw} = Dimensions.get('window');
 
 const CatalogsScreen: React.FC = props => {
   const {title, subtitle} = catalogsData;
   const {loading, error, data} = useQuery(ME_QUERY, {
-    onCompleted: data => {
-      console.log(data);
+    onError: () => {
+      throw new Error();
+    },
+    onCompleted: () => {
+      console.log(data, 'me data from catalogs component');
     },
   });
-
-  useEffect(() => {
-    console.log(loading, error, data);
-  }, []);
   return (
     <View style={[globalStyles.screenWrapper]}>
       <ManWithBoxLogo style={styles.logo} />

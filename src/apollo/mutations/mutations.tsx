@@ -114,3 +114,9 @@ export const REGISTER_USER = gql`
     }
   }
 `;
+
+export const LOGOUT_USER = gql`
+  mutation logout {
+    logout
+  }
+`;
