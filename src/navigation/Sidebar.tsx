@@ -35,12 +35,13 @@ const Sidebar = (
     });
     setDesiredDrawerItems(navItemsAfterFilter);
   }, []);
+
   const navigateToOtherScreen = (screenName: string) => {
     navigation.navigate({routeName: screenName});
   };
+
   const [logout] = useMutation(LOGOUT_USER, {
     onError: errorData => {
-      console.log(errorData);
       const [extensions] = errorData.graphQLErrors;
       const errorString = extensions?.message;
       throw new Error(errorString);
@@ -50,6 +51,7 @@ const Sidebar = (
       navigateToOtherScreen('Intro');
     },
   });
+
   const handlePressLogout = () => {
     logout();
   };

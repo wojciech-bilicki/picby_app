@@ -1,25 +1,17 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {View, Text, StyleSheet, Dimensions} from 'react-native';
 import ManWithBoxLogo from './icons/man.svg';
 import {catalogsData, commonColors} from '../../staticData/staticData';
 import {globalStyles} from '../../common/styles/globalStyles';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import PlusIcon from '../../common/icons/plus.svg';
-import {useQuery} from '@apollo/react-hooks';
-import {ME_QUERY} from '../../apollo/queries/queries';
+
 const {darkRed, lightBlue, orangeRed} = commonColors;
 const {width: vw} = Dimensions.get('window');
 
 const CatalogsScreen: React.FC = props => {
   const {title, subtitle} = catalogsData;
-  const {loading, error, data} = useQuery(ME_QUERY, {
-    onError: () => {
-      throw new Error();
-    },
-    onCompleted: () => {
-      console.log(data, 'me data from catalogs component');
-    },
-  });
+
   return (
     <View style={[globalStyles.screenWrapper]}>
       <ManWithBoxLogo style={styles.logo} />
@@ -29,7 +21,7 @@ const CatalogsScreen: React.FC = props => {
         <TouchableOpacity
           style={styles.plusIconWrapper}
           onPress={() => {
-            console.log('siema heniu');
+            console.log('button pressed');
           }}>
           <PlusIcon />
         </TouchableOpacity>
