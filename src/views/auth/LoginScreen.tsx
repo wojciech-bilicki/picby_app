@@ -38,12 +38,6 @@ import {NavigationStackProp} from 'react-navigation-stack';
 import {useStoreState, useStoreActions} from '../../easyPeasy/hooks';
 import {useMutation} from '@apollo/react-hooks';
 import {LOGIN_USER, CONFIRM_USER} from '../../apollo/mutations/mutations';
-import {
-  getUserTokenFromAsyncStorage,
-  saveUserTokenInAsyncStorage,
-} from '../../easyPeasy/auth/login/utils';
-import client from '../../../apollo.config';
-import {ME_QUERY} from '../../apollo/queries/queries';
 
 const {width: vw} = Dimensions.get('window');
 
@@ -51,9 +45,7 @@ type LoginScreenProps = {
   navigation: NavigationStackProp;
 };
 
-interface handleLoginRequest {
-  email: string;
-  password: string;
+interface handleLoginRequest extends CredentialTypes {
   resetForm: () => void;
 }
 
@@ -71,10 +63,32 @@ type userTokenType = string | undefined;
 const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
   const {navigate} = navigation;
   const {badEmailOrPasswordCode, userNotConfirmedCode} = userLoginErrorCodes;
+  const {loginHeaderTextTwo, loginHeaderTextOne} = introHeaderText;
 
-  useEffect(() => {
-    navigation.addListener('didBlur', () => setLoginScreenStateToDefault(true));
-  }, []);
+  const {
+    messageBadEmail,
+    messageBadPassword,
+    messageLoginSuccess,
+    forgotPasswordText,
+    messageServerError,
+    messageEmailConfirmation,
+    messageUserNotConfirmed,
+  } = loginMessages;
+
+  const {placeholderTextBlueColor} = inputData;
+
+  const {
+    loginText,
+    loginWithGoogle,
+    textColorBlue,
+    textColorWhite,
+  } = buttonsData;
+
+  const [userTokenValue, setUserTokenValue] = useState<userTokenType>(
+    undefined,
+  );
+  const {handlePopUpAnimation, fadeAnim} = useHandlePopupAnimation();
+
   const {
     setIsUserNotConfirmed,
     setIsServerNotResponding,
@@ -95,6 +109,35 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     areLoginButtonsDisabled,
     messagePopUpText,
   } = useStoreState(state => state.LoginModel);
+
+  const [loginUser] = useMutation(LOGIN_USER, {
+    onError: errorData => {
+      const [extensions] = errorData.graphQLErrors;
+      const errorString = extensions.message;
+      throw new Error(errorString);
+    },
+  });
+  const [confirmUser] = useMutation(CONFIRM_USER, {
+    onError: errorData => {
+      const [extensions] = errorData.graphQLErrors;
+      const errorCode = extensions?.extensions?.exception.code;
+      throw new Error(errorCode);
+    },
+  });
+
+  const redirectToFirstLoginDashboard = () => {
+    navigation.dangerouslyGetParent()?.navigate('FirstLogin');
+  };
+
+  const loginGraphQLQuery = async ({email, password}: CredentialTypes) => {
+    const emailLowerCase = email.toLowerCase();
+
+    try {
+      await loginUser({variables: {email: emailLowerCase, password}});
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
 
   const handleLoginRequestAndErrors = async ({
     email,
@@ -118,106 +161,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
       setIsLoginSuccess(false);
       setIsServerNotResponding(false);
       setIsUserNotConfirmed(false);
-      setTimeout(
-        () => setAreLoginButtonsDisabled(false),
-        ENABLE_BUTTONS_DELAY_TIME,
-      );
     }
   };
 
-  const [loginUser] = useMutation(LOGIN_USER, {
-    onError: errorData => {
-      const [extensions] = errorData.graphQLErrors;
-      const errorString = extensions.message;
-      throw new Error(errorString);
-    },
-  });
-
-  const loginGraphQLQuery = async ({email, password}: CredentialTypes) => {
-    const emailLowerCase = email.toLowerCase();
-
-    try {
-      await loginUser({variables: {email: emailLowerCase, password}});
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  };
-
-  const {loginHeaderTextTwo, loginHeaderTextOne} = introHeaderText;
-
-  const {
-    messageBadEmail,
-    messageBadPassword,
-    messageLoginSuccess,
-    forgotPasswordText,
-    messageServerError,
-    messageEmailConfirmation,
-    messageUserNotConfirmed,
-  } = loginMessages;
-
-  const {placeholderTextBlueColor} = inputData;
-  const [userTokenValue, setUserTokenValue] = useState<userTokenType>(
-    undefined,
-  );
-
-  const {
-    loginText,
-    loginWithGoogle,
-    textColorBlue,
-    textColorWhite,
-  } = buttonsData;
-
-  const reviewSchema = yup.object({
-    email: yup
-      .string()
-      .required()
-      .email(),
-    password: yup.string().required(),
-  });
-
-  useEffect(() => {
-    const userToken: userTokenType = navigation.getParam('token');
-    userToken && setUserTokenValue(userToken);
-  });
-
-  useEffect(() => {
-    userTokenValue && handleConfirmUserAndHandleErrors(userTokenValue);
-  }, [userTokenValue]);
-
-  // handle errors // podzielic na kilka useeffect
-  useEffect(() => {
-    if (isServerNotResponding) {
-      setMessagePopUpText(messageServerError);
-      handlePopUpAnimation();
-    } else if (isLoginSuccess) {
-      setMessagePopUpText(messageLoginSuccess);
-      handlePopUpAnimation(redirectToFirstLoginDashboard);
-    } else if (isUserConfirmedSuccess) {
-      setMessagePopUpText(messageEmailConfirmation);
-      handlePopUpAnimation();
-    } else if (isUserNotConfirmed) {
-      setMessagePopUpText(messageUserNotConfirmed);
-      handlePopUpAnimation();
-    }
-  }, [
-    isLoginSuccess,
-    isServerNotResponding,
-    isPasswordBad,
-    isUserConfirmedSuccess,
-    isUserNotConfirmed,
-  ]);
-
-  const redirectToFirstLoginDashboard = () => {
-    navigation.dangerouslyGetParent()?.navigate('FirstLogin');
-  };
-
-  const redirectToDashboard = () => {
-    navigation.dangerouslyGetParent()?.navigate('Catalogs');
-  };
-
-  const {handlePopUpAnimation, fadeAnim} = useHandlePopupAnimation();
-
-  const sendLoginRequest = async (
+  const handleFormSubmit = async (
     values: CredentialTypes,
     actions: ActionTypes,
   ) => {
@@ -226,15 +173,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     await handleLoginRequestAndErrors({email, password, resetForm});
   };
 
-  const [confirmUser] = useMutation(CONFIRM_USER, {
-    onError: errorData => {
-      const [extensions] = errorData.graphQLErrors;
-      const errorCode = extensions?.extensions?.exception.code;
-      throw new Error(errorCode);
-    },
-  });
-
-  const confirmUserRequest = async (userToken: string) => {
+  const confirmUserGraphQLQuery = async (userToken: string) => {
     try {
       await confirmUser({variables: {token: userToken}});
     } catch (error) {
@@ -246,7 +185,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     try {
       setAreLoginButtonsDisabled(true);
       await setIsServerNotResponding(false);
-      await confirmUserRequest(userToken);
+      await confirmUserGraphQLQuery(userToken);
       setIsUserConfirmedSuccess(true);
     } catch (error) {
       setIsServerNotResponding(true);
@@ -258,6 +197,55 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
       );
     }
   };
+
+  const reviewSchema = yup.object({
+    email: yup
+      .string()
+      .required()
+      .email(),
+    password: yup.string().required(),
+  });
+
+  useEffect(() => {
+    navigation.addListener('didBlur', () => setLoginScreenStateToDefault(true));
+  }, []);
+
+  useEffect(() => {
+    const userToken: userTokenType = navigation.getParam('token');
+    userToken && setUserTokenValue(userToken);
+  });
+
+  useEffect(() => {
+    userTokenValue && handleConfirmUserAndHandleErrors(userTokenValue);
+  }, [userTokenValue]);
+
+  useEffect(() => {
+    if (isServerNotResponding) {
+      setMessagePopUpText(messageServerError);
+      handlePopUpAnimation();
+    }
+  }, [isServerNotResponding]);
+
+  useEffect(() => {
+    if (isLoginSuccess) {
+      setMessagePopUpText(messageLoginSuccess);
+      handlePopUpAnimation(redirectToFirstLoginDashboard);
+    }
+  }, [isLoginSuccess]);
+
+  useEffect(() => {
+    if (isUserConfirmedSuccess) {
+      setMessagePopUpText(messageEmailConfirmation);
+      handlePopUpAnimation();
+    }
+  }, [isUserConfirmedSuccess]);
+
+  useEffect(() => {
+    if (isUserNotConfirmed) {
+      setMessagePopUpText(messageUserNotConfirmed);
+      handlePopUpAnimation();
+    }
+  }, [isUserNotConfirmed]);
 
   return (
     <ScrollView>
@@ -278,7 +266,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
               validationSchema={reviewSchema}
               initialValues={{email: '', password: ''}}
               onSubmit={(values, actions) => {
-                sendLoginRequest(values, actions);
+                handleFormSubmit(values, actions);
               }}>
               {formikProps => (
                 <View>
@@ -361,6 +349,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     </ScrollView>
   );
 };
+
 const styles = StyleSheet.create({
   gotAccountQuestion: {
     alignSelf: 'flex-start',

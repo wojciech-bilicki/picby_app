@@ -23,6 +23,7 @@ const LoadingScreen: React.FC<Props> = ({navigation}) => {
   const navigateToOtherScreen = (screenName: string) => {
     navigation.navigate({routeName: screenName});
   };
+
   const {error, data} = useQuery(ME_QUERY, {
     onError: () => {
       console.log(error);

@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, {useEffect} from 'react';
 import {
   View,
   Text,
@@ -51,6 +51,25 @@ interface ActionTypes {
 
 const RegisterScreen: React.FC<NavTypes> = ({navigation}) => {
   const {navigate} = navigation;
+  const {placeholderTextBlueColor} = inputData;
+  const {registerHeaderTextTwo, registerHeaderTextOne} = introHeaderText;
+
+  const {
+    messageBadEmail,
+    messageEmailAlreadyTaken,
+    messagePasswordError,
+    messageRegisterSuccess,
+    messagePasswordNotSimilar,
+    messageFieldRequired,
+    messageServerError,
+  } = registerMessages;
+
+  const {
+    registerText,
+    registerWithGoogle,
+    textColorBlue,
+    textColorWhite,
+  } = buttonsData;
 
   const {
     areRegisterButtonsDisabled,
@@ -71,25 +90,13 @@ const RegisterScreen: React.FC<NavTypes> = ({navigation}) => {
 
   const {handlePopUpAnimation, fadeAnim} = useHandlePopupAnimation();
 
-  const {
-    messageBadEmail,
-    messageEmailAlreadyTaken,
-    messagePasswordError,
-    messageRegisterSuccess,
-    messagePasswordNotSimilar,
-    messageFieldRequired,
-    messageServerError,
-  } = registerMessages;
-
-  const {
-    registerText,
-    registerWithGoogle,
-    textColorBlue,
-    textColorWhite,
-  } = buttonsData;
-
-  const {placeholderTextBlueColor} = inputData;
-  const {registerHeaderTextTwo, registerHeaderTextOne} = introHeaderText;
+  const [registerUser] = useMutation(REGISTER_USER, {
+    onError: errorData => {
+      const [extensions] = errorData.graphQLErrors;
+      const errorCode = extensions.extensions?.exception.code;
+      throw new Error(errorCode);
+    },
+  });
 
   const reviewSchema = yup.object({
     email: yup
@@ -105,6 +112,7 @@ const RegisterScreen: React.FC<NavTypes> = ({navigation}) => {
       .required(messageFieldRequired)
       .oneOf([yup.ref('password'), null], messagePasswordNotSimilar),
   });
+
   const handleRegisterRequestAndErrors = async (
     email: string,
     password: string,
@@ -131,6 +139,7 @@ const RegisterScreen: React.FC<NavTypes> = ({navigation}) => {
       );
     }
   };
+
   const registerGraphQLQuery = async ({email, password}: CredentialTypes) => {
     try {
       await registerUser({variables: {email, password}});
@@ -138,14 +147,8 @@ const RegisterScreen: React.FC<NavTypes> = ({navigation}) => {
       throw new Error(error.message);
     }
   };
-  const [registerUser] = useMutation(REGISTER_USER, {
-    onError: errorData => {
-      const [extensions] = errorData.graphQLErrors;
-      const errorCode = extensions.extensions?.exception.code;
-      throw new Error(errorCode);
-    },
-  });
-  const sendRegisterRequest = async (
+
+  const handleFormSubmit = async (
     values: CredentialTypes,
     actions: ActionTypes,
   ) => {
@@ -153,19 +156,21 @@ const RegisterScreen: React.FC<NavTypes> = ({navigation}) => {
     const {resetForm} = actions;
     handleRegisterRequestAndErrors(email, password, resetForm);
   };
-  React.useEffect(() => {
+
+  useEffect(() => {
     return () => {
       !navigation.isFocused() && setRegisterScreenStateToDefault(true);
     };
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isItServerError) {
       setMessagePopUpText(messageServerError);
       handlePopUpAnimation();
     }
   }, [isItServerError]);
-  React.useEffect(() => {
+
+  useEffect(() => {
     if (isRegisterSuccess) {
       setMessagePopUpText(messageRegisterSuccess);
       handlePopUpAnimation();
@@ -190,7 +195,7 @@ const RegisterScreen: React.FC<NavTypes> = ({navigation}) => {
               validationSchema={reviewSchema}
               initialValues={{email: '', password: '', passwordRepeat: ''}}
               onSubmit={(values, actions) => {
-                sendRegisterRequest(values, actions);
+                handleFormSubmit(values, actions);
               }}>
               {formikProps => (
                 <View>
