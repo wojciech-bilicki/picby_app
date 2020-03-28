@@ -13,6 +13,7 @@ import eyePic from '../../common/images/bigEye.png';
 import FlatButton from '../../common/components/Button';
 import {buttonsData} from '../../staticData/staticData';
 import {NavigationStackProp} from 'react-navigation-stack';
+import {useStoreActions} from '../../easyPeasy/hooks';
 
 const {width: vw} = Dimensions.get('window');
 
@@ -31,14 +32,19 @@ const Introduction: React.FC<Props> = ({
 }) => {
   const {registerText, loginText, textColorWhite} = buttonsData;
 
+  const {resetActiveScreenNumberToDefault} = useStoreActions(
+    actions => actions.IntroductionModel,
+  );
+
+  const navigateToOtherScreen = (screenName: string) => {
+    navigation.navigate({routeName: screenName});
+    resetActiveScreenNumberToDefault(1);
+  };
+
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', () => true);
     return BackHandler.removeEventListener('hardwareBackPress', () => true);
   }, []);
-
-  const navigateToOtherScreen = (screenName: string) => {
-    navigation.navigate({routeName: screenName});
-  };
 
   return (
     <ScrollView>
