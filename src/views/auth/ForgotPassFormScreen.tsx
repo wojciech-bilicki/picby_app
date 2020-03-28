@@ -86,13 +86,12 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
   } = useStoreState(state => state.ForgotPassModel);
 
   const {
-    messageBadMail,
-    messageEmailNotFound,
     messageSendSuccess,
     changePasswordHeader,
-    contentHeader,
     messageServerError,
   } = forgotPasswordMessages;
+
+  const {messagePasswordError, messagePasswordNotSimilar} = registerMessages;
 
   const {placeholderTextBlueColor} = inputData;
   const {textColorWhite, textColorBlue, sendText, goBackText} = buttonsData;
@@ -195,12 +194,6 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
                           onChangeText={formikProps.handleChange('password')}
                           value={formikProps.values.password}
                           onBlur={formikProps.handleBlur('password')}
-                          onFocus={() => {
-                            if (isEmailNotFound) {
-                              setIsEmailNotFound(false);
-                              setAreForgotPassButtonsDisabled(false);
-                            }
-                          }}
                         />
                       </View>
                       <View style={globalStyles.errorTextWrapper}>
@@ -212,8 +205,7 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
                         <Text style={globalStyles.errorText}>
                           {formikProps.touched.password &&
                             formikProps.errors.password &&
-                            messageBadMail}
-                          {isEmailNotFound && messageEmailNotFound}
+                            messagePasswordError}
                         </Text>
                       </View>
                       <View style={styles.inputWrapper}>
@@ -229,12 +221,6 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
                           )}
                           value={formikProps.values.passwordRepeat}
                           onBlur={formikProps.handleBlur('passwordRepeat')}
-                          onFocus={() => {
-                            if (isEmailNotFound) {
-                              setIsEmailNotFound(false);
-                              setAreForgotPassButtonsDisabled(false);
-                            }
-                          }}
                         />
                         <TouchableOpacity
                           onPress={() =>
@@ -252,16 +238,14 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
                         </TouchableOpacity>
                       </View>
                       <View style={globalStyles.errorTextWrapper}>
-                        {(formikProps.touched.passwordRepeat &&
-                          formikProps.errors.passwordRepeat) ||
-                        isEmailNotFound ? (
+                        {formikProps.touched.passwordRepeat &&
+                        formikProps.errors.passwordRepeat ? (
                           <ErrorLogo style={globalStyles.errorExlamationMark} />
                         ) : null}
                         <Text style={globalStyles.errorText}>
                           {formikProps.touched.passwordRepeat &&
                             formikProps.errors.passwordRepeat &&
-                            messageBadMail}
-                          {isEmailNotFound && messageEmailNotFound}
+                            messagePasswordNotSimilar}
                         </Text>
                       </View>
                       <View style={styles.buttonsWrapper}>
