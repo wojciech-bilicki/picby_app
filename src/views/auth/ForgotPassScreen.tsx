@@ -33,6 +33,8 @@ import {
 } from '../../staticData/staticData';
 import {NavigationStackProp} from 'react-navigation-stack';
 import {useStoreActions, useStoreState} from '../../easyPeasy/hooks';
+import {useMutation} from '@apollo/react-hooks';
+import {FORGOT_PASSWORD} from '../../apollo/mutations/mutations';
 
 const {width: vw, height: vh} = Dimensions.get('window');
 
@@ -88,19 +90,20 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
   const {placeholderTextBlueColor} = inputData;
   const {textColorWhite, textColorBlue, sendText, goBackText} = buttonsData;
 
-  const forgotPassGraphQLQuery = async () => {
-    //that query gonna change once forgotpass form is ready
+  const [sendReminderEmail] = useMutation(FORGOT_PASSWORD, {
+    onError: errorData => {
+      const [extensions] = errorData.graphQLErrors;
+      const errorString = extensions.message;
+      throw new Error(errorString);
+    },
+    onCompleted: data => console.log(data),
+  });
+
+  const forgotPassGraphQLQuery = async (email: string) => {
     try {
-      //to have good response delete /"random string" after /pokemon/
-      await fetch('https://pokeapi.co/api/v2/pokemon/asdasd').then(response => {
-        if (response.status > 400) {
-          throw new Error();
-          //add else if with different status to pass error to catch
-        }
-        return response;
-      });
+      await sendReminderEmail({variables: {email}});
     } catch (error) {
-      throw new Error('2');
+      throw new Error(error.message);
     }
   };
 
@@ -111,12 +114,12 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
     try {
       setAreForgotPassButtonsDisabled(true);
       await setIsItForgotPassServerError(false);
-      await forgotPassGraphQLQuery();
+      await forgotPassGraphQLQuery(email);
       await setIsEmailSendSuccess(true);
       resetForm();
     } catch (error) {
-      // setIsEmailNotFound(true);
-      setIsItForgotPassServerError(true);
+      setIsEmailNotFound(true);
+      // setIsItForgotPassServerError(true);
     } finally {
       // setIsEmailNotFound(false);
       setIsItForgotPassServerError(false);
@@ -144,10 +147,7 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
     }
   }, [isItForgotPassServerError, isEmailSendSuccess]);
 
-  const sendReminderEmail = async (
-    values: InputValueType,
-    actions: ActionTypes,
-  ) => {
+  const handleSubmit = async (values: InputValueType, actions: ActionTypes) => {
     const {email} = values;
     const {resetForm} = actions;
     handleForgotPasswordRequestAndErrors(email, resetForm);
@@ -172,7 +172,7 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
                 initialValues={{email: ''}}
                 onSubmit={(values, actions) => {
                   //
-                  sendReminderEmail(values, actions);
+                  handleSubmit(values, actions);
                 }}>
                 {formikProps => {
                   return (
