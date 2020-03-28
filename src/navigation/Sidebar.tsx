@@ -52,10 +52,6 @@ const Sidebar = (
     },
   });
 
-  const handlePressLogout = () => {
-    logout();
-  };
-
   return (
     <View>
       <Header
@@ -70,7 +66,7 @@ const Sidebar = (
         </View>
         <TouchableOpacity
           style={styles.elementWrapper}
-          onPress={handlePressLogout}>
+          onPress={() => logout()}>
           <View
             style={[globalStyles.menuIcon, {backgroundColor: YELLOW_COLOR}]}>
             <LogoutIcon />
