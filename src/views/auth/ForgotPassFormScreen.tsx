@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -14,11 +14,13 @@ import eyePic from '../../common/images/bigEye.png';
 import FlatButton from '../../common/components/Button';
 import {Formik} from 'formik';
 import * as yup from 'yup';
-import EmailLogo from './icons/envelope.svg';
+import PasswordVisibleIcon from '../../common/icons/passwordShownEye.svg';
+import PasswordInvisibleIcon from '../../common/icons/passwordHiddenEye.svg';
 import ErrorLogo from './icons/exclamationMark.svg';
 import {
   TouchableWithoutFeedback,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native-gesture-handler';
 import {globalStyles} from '../../common/styles/globalStyles';
 import {
@@ -33,14 +35,21 @@ import {
 } from '../../staticData/staticData';
 import {NavigationStackProp} from 'react-navigation-stack';
 import {useStoreActions, useStoreState} from '../../easyPeasy/hooks';
+import {registerMessages} from '../../staticData/staticData';
+import KeyLogo from './icons/key.svg';
 
 const {width: vw, height: vh} = Dimensions.get('window');
+const {messagePasswordNotSimilar, messageFieldRequired} = registerMessages;
 
 const reviewSchema = yup.object({
-  email: yup
+  password: yup
     .string()
     .required()
-    .email(),
+    .min(8),
+  passwordRepeat: yup
+    .string()
+    .required(messageFieldRequired)
+    .oneOf([yup.ref('password'), null], messagePasswordNotSimilar),
 });
 
 type Props = {
@@ -58,7 +67,7 @@ interface ActionTypes {
 const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
   const {navigate} = navigation;
   const {handlePopUpAnimation, fadeAnim} = useHandlePopupAnimation();
-
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const {
     setAreForgotPassButtonsDisabled,
     setIsEmailNotFound,
@@ -168,23 +177,24 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
             <View>
               <Formik
                 validationSchema={reviewSchema}
-                initialValues={{email: ''}}
+                initialValues={{password: '', passwordRepeat: ''}}
                 onSubmit={(values, actions) => {
-                  //
-                  sendReminderEmail(values, actions);
+                  console.log('submit');
                 }}>
                 {formikProps => {
                   return (
                     <View>
                       <View style={styles.inputWrapper}>
+                        <KeyLogo style={globalStyles.keyLogo} />
                         <TextInput
-                          keyboardType="email-address"
+                          secureTextEntry={!isPasswordVisible}
+                          keyboardType="default"
                           style={styles.input}
                           placeholder="Wpisz nowe hasło"
                           placeholderTextColor={placeholderTextBlueColor}
-                          onChangeText={formikProps.handleChange('email')}
-                          value={formikProps.values.email}
-                          onBlur={formikProps.handleBlur('email')}
+                          onChangeText={formikProps.handleChange('password')}
+                          value={formikProps.values.password}
+                          onBlur={formikProps.handleBlur('password')}
                           onFocus={() => {
                             if (isEmailNotFound) {
                               setIsEmailNotFound(false);
@@ -194,27 +204,31 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
                         />
                       </View>
                       <View style={globalStyles.errorTextWrapper}>
-                        {(formikProps.touched.email &&
-                          formikProps.errors.email) ||
+                        {(formikProps.touched.password &&
+                          formikProps.errors.password) ||
                         isEmailNotFound ? (
                           <ErrorLogo style={globalStyles.errorExlamationMark} />
                         ) : null}
                         <Text style={globalStyles.errorText}>
-                          {formikProps.touched.email &&
-                            formikProps.errors.email &&
+                          {formikProps.touched.password &&
+                            formikProps.errors.password &&
                             messageBadMail}
                           {isEmailNotFound && messageEmailNotFound}
                         </Text>
                       </View>
                       <View style={styles.inputWrapper}>
+                        <KeyLogo style={globalStyles.keyLogo} />
                         <TextInput
+                          secureTextEntry={!isPasswordVisible}
                           keyboardType="default"
                           style={styles.input}
                           placeholder="Powtórz hasło"
                           placeholderTextColor={placeholderTextBlueColor}
-                          onChangeText={formikProps.handleChange('email')}
-                          value={formikProps.values.email}
-                          onBlur={formikProps.handleBlur('email')}
+                          onChangeText={formikProps.handleChange(
+                            'passwordRepeat',
+                          )}
+                          value={formikProps.values.passwordRepeat}
+                          onBlur={formikProps.handleBlur('passwordRepeat')}
                           onFocus={() => {
                             if (isEmailNotFound) {
                               setIsEmailNotFound(false);
@@ -222,16 +236,30 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
                             }
                           }}
                         />
+                        <TouchableOpacity
+                          onPress={() =>
+                            setIsPasswordVisible(!isPasswordVisible)
+                          }>
+                          {isPasswordVisible ? (
+                            <PasswordVisibleIcon
+                              style={globalStyles.emailLogo}
+                            />
+                          ) : (
+                            <PasswordInvisibleIcon
+                              style={globalStyles.emailLogo}
+                            />
+                          )}
+                        </TouchableOpacity>
                       </View>
                       <View style={globalStyles.errorTextWrapper}>
-                        {(formikProps.touched.email &&
-                          formikProps.errors.email) ||
+                        {(formikProps.touched.passwordRepeat &&
+                          formikProps.errors.passwordRepeat) ||
                         isEmailNotFound ? (
                           <ErrorLogo style={globalStyles.errorExlamationMark} />
                         ) : null}
                         <Text style={globalStyles.errorText}>
-                          {formikProps.touched.email &&
-                            formikProps.errors.email &&
+                          {formikProps.touched.passwordRepeat &&
+                            formikProps.errors.passwordRepeat &&
                             messageBadMail}
                           {isEmailNotFound && messageEmailNotFound}
                         </Text>
@@ -304,7 +332,8 @@ const styles = StyleSheet.create({
     marginBottom: vw * 0.168,
   },
   input: {
-    width: 0.72 * vw,
+    paddingLeft: 0.053 * vw,
+    width: 0.65 * vw,
     margin: 0,
     padding: 0,
     letterSpacing: 0.3,
