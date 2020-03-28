@@ -29,7 +29,7 @@ const LoadingScreen: React.FC<Props> = ({navigation}) => {
       console.log(error);
     },
     onCompleted: () => {
-      const userId = data.me;
+      const userId = data?.me;
       if (userId) {
         navigateToOtherScreen('Catalogs');
       } else {

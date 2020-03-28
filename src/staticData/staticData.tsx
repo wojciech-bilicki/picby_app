@@ -25,6 +25,7 @@ export const forgotPasswordMessages = {
   contentText: `Wprowadź swój adres e-mail ${'\n'} żeby zresetować hasło.`,
   messageServerError: 'Błąd serwera',
   contentHeader: 'ZAPOMNIAŁEŚ HASŁA?',
+  changePasswordHeader: 'ZMIEŃ HASŁO',
 };
 
 export const buttonsData = {

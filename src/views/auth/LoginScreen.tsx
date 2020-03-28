@@ -247,6 +247,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
     }
   }, [isUserNotConfirmed]);
 
+  const navigateToOtherScreen = (screenName: string) => {
+    navigation.navigate({routeName: screenName});
+  };
   return (
     <ScrollView>
       <TouchableWithoutFeedback onPress={dismissKeyboard}>
@@ -321,7 +324,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
 
                   <View style={styles.googleButtonWrapper}>
                     <FlatButton
-                      onPress={formikProps.handleSubmit}
+                      onPress={() => navigate('ForgotPassForm')}
                       colorVariantIndex={1}
                       textValue={loginWithGoogle}
                       textColor={textColorBlue}
