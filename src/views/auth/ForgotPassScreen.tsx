@@ -91,12 +91,12 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
   const {textColorWhite, textColorBlue, sendText, goBackText} = buttonsData;
 
   const [sendReminderEmail] = useMutation(FORGOT_PASSWORD, {
-    onError: errorData => {
-      const [extensions] = errorData.graphQLErrors;
-      const errorString = extensions.message;
-      throw new Error(errorString);
+    onCompleted: data => {
+      const returnedData = data.forgotPassword;
+      if (returnedData == false) {
+        throw new Error('401');
+      }
     },
-    onCompleted: data => console.log(data),
   });
 
   const forgotPassGraphQLQuery = async (email: string) => {
@@ -116,18 +116,18 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
       await setIsItForgotPassServerError(false);
       await forgotPassGraphQLQuery(email);
       await setIsEmailSendSuccess(true);
-      resetForm();
+      setTimeout(() => {
+        setAreForgotPassButtonsDisabled(false);
+        resetForm();
+      }, ENABLE_BUTTONS_DELAY_TIME);
     } catch (error) {
-      setIsEmailNotFound(true);
-      // setIsItForgotPassServerError(true);
+      const errorCode = Number(error.message);
+      errorCode == 401
+        ? setIsEmailNotFound(true)
+        : setIsItForgotPassServerError(true);
     } finally {
-      // setIsEmailNotFound(false);
       setIsItForgotPassServerError(false);
       setIsEmailSendSuccess(false);
-      setTimeout(
-        () => setAreForgotPassButtonsDisabled(false),
-        ENABLE_BUTTONS_DELAY_TIME,
-      );
     }
   };
   React.useEffect(() => {
