@@ -19,7 +19,7 @@ const screens = {
   },
   ForgotPassForm: {
     screen: ForgotPasswordFormScreen,
-    path: 'forgotPasswordForm',
+    path: 'forgotPasswordForm/:token',
   },
 };
 const AuthStackNav = createStackNavigator(screens, {

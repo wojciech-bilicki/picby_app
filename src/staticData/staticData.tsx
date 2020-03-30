@@ -26,6 +26,7 @@ export const forgotPasswordMessages = {
   messageServerError: 'Błąd serwera',
   contentHeader: 'ZAPOMNIAŁEŚ HASŁA?',
   changePasswordHeader: 'ZMIEŃ HASŁO',
+  passwordChangeSuccess: `Hasło zostało zmienione, ${'\n'} możesz się zalogować.`,
 };
 
 export const buttonsData = {

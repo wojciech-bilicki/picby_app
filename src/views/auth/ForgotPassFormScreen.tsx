@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -37,6 +37,9 @@ import {NavigationStackProp} from 'react-navigation-stack';
 import {useStoreActions, useStoreState} from '../../easyPeasy/hooks';
 import {registerMessages} from '../../staticData/staticData';
 import KeyLogo from './icons/key.svg';
+import {useMutation} from '@apollo/react-hooks';
+import {CHANGE_PASSWORD} from '../../apollo/mutations/mutations';
+import client from '../../../apollo.config';
 
 const {width: vw, height: vh} = Dimensions.get('window');
 const {messagePasswordNotSimilar, messageFieldRequired} = registerMessages;
@@ -57,36 +60,38 @@ type Props = {
 };
 
 interface InputValueType {
-  email: string;
+  password: string;
 }
 
 interface ActionTypes {
   resetForm: () => void;
 }
 
+type userTokenType = string | undefined;
+
 const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
   const {navigate} = navigation;
   const {handlePopUpAnimation, fadeAnim} = useHandlePopupAnimation();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [userTokenValue, setUserTokenValue] = useState();
+
   const {
-    setAreForgotPassButtonsDisabled,
-    setIsEmailNotFound,
+    setAreForgotFormButtonsDisabled,
     setIsEmailSendSuccess,
-    setIsItForgotPassServerError,
-    setForgotScreenStateToDefault,
+    setIsItForgotFormServerError,
+    setForgotFormStateToDefault,
     setMessagePopUpText,
-  } = useStoreActions(actions => actions.ForgotPassModel);
+  } = useStoreActions(actions => actions.ForgotFormModel);
 
   const {
-    areForgotPassButtonsDisabled,
-    isEmailNotFound,
+    areForgotFormButtonsDisabled,
     isEmailSendSuccess,
-    isItForgotPassServerError,
+    isItForgotFormServerError,
     messagePopUpText,
-  } = useStoreState(state => state.ForgotPassModel);
+  } = useStoreState(state => state.ForgotFormModel);
 
   const {
-    messageSendSuccess,
+    passwordChangeSuccess,
     changePasswordHeader,
     messageServerError,
   } = forgotPasswordMessages;
@@ -96,70 +101,76 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
   const {placeholderTextBlueColor} = inputData;
   const {textColorWhite, textColorBlue, sendText, goBackText} = buttonsData;
 
-  const forgotPassGraphQLQuery = async () => {
-    //that query gonna change once forgotpass form is ready
+  const [changePassword] = useMutation(CHANGE_PASSWORD, {
+    onError: errorData => {
+      const [extensions] = errorData?.graphQLErrors;
+      const errorString = extensions.message;
+      throw new Error(errorString);
+    },
+  });
+
+  const changePassGraphQLQuery = async ({
+    password,
+    token,
+  }: {
+    password: string;
+    token: string;
+  }) => {
     try {
-      //to have good response delete /"random string" after /pokemon/
-      await fetch('https://pokeapi.co/api/v2/pokemon/asdasd').then(response => {
-        if (response.status > 400) {
-          throw new Error();
-          //add else if with different status to pass error to catch
-        }
-        return response;
-      });
+      await changePassword({variables: {password, token}});
     } catch (error) {
-      throw new Error('2');
+      throw new Error(error.message);
     }
   };
 
-  const handleForgotPasswordRequestAndErrors = async (
-    email: string,
+  const handleNewPasswordRequestAndErrors = async (
+    password: string,
     resetForm: () => void,
   ) => {
     try {
-      setAreForgotPassButtonsDisabled(true);
-      await setIsItForgotPassServerError(false);
-      await forgotPassGraphQLQuery();
+      setAreForgotFormButtonsDisabled(true);
+      await setIsItForgotFormServerError(false);
+      await changePassGraphQLQuery({password, token: userTokenValue});
       await setIsEmailSendSuccess(true);
-      resetForm();
+      setTimeout(() => {
+        setAreForgotFormButtonsDisabled(false);
+        resetForm();
+      }, ENABLE_BUTTONS_DELAY_TIME);
     } catch (error) {
-      // setIsEmailNotFound(true);
-      setIsItForgotPassServerError(true);
+      setIsItForgotFormServerError(true);
     } finally {
-      // setIsEmailNotFound(false);
-      setIsItForgotPassServerError(false);
+      setIsItForgotFormServerError(false);
       setIsEmailSendSuccess(false);
-      setTimeout(
-        () => setAreForgotPassButtonsDisabled(false),
-        ENABLE_BUTTONS_DELAY_TIME,
-      );
+      client.cache.reset();
     }
   };
-  React.useEffect(() => {
+
+  useEffect(() => {
     return () => {
-      !navigation.isFocused() && setForgotScreenStateToDefault(true);
+      !navigation.isFocused() && setForgotFormStateToDefault(true);
     };
   }, []);
 
-  // handle popup notifications //
-  React.useEffect(() => {
+  useEffect(() => {
     if (isEmailSendSuccess) {
-      setMessagePopUpText(messageSendSuccess);
+      setMessagePopUpText(passwordChangeSuccess);
       handlePopUpAnimation();
-    } else if (isItForgotPassServerError) {
+    } else if (isItForgotFormServerError) {
       setMessagePopUpText(messageServerError);
       handlePopUpAnimation();
     }
-  }, [isItForgotPassServerError, isEmailSendSuccess]);
+  }, [isItForgotFormServerError, isEmailSendSuccess]);
 
-  const sendReminderEmail = async (
-    values: InputValueType,
-    actions: ActionTypes,
-  ) => {
-    const {email} = values;
+  const handleSubmit = async (values: InputValueType, actions: ActionTypes) => {
+    const {password} = values;
     const {resetForm} = actions;
-    handleForgotPasswordRequestAndErrors(email, resetForm);
+    handleNewPasswordRequestAndErrors(password, resetForm);
   };
+
+  useEffect(() => {
+    const userToken: userTokenType = navigation.getParam('token');
+    userToken && setUserTokenValue(userToken);
+  }, []);
 
   return (
     <ScrollView>
@@ -178,7 +189,7 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
                 validationSchema={reviewSchema}
                 initialValues={{password: '', passwordRepeat: ''}}
                 onSubmit={(values, actions) => {
-                  console.log('submit');
+                  handleSubmit(values, actions);
                 }}>
                 {formikProps => {
                   return (
@@ -197,9 +208,8 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
                         />
                       </View>
                       <View style={globalStyles.errorTextWrapper}>
-                        {(formikProps.touched.password &&
-                          formikProps.errors.password) ||
-                        isEmailNotFound ? (
+                        {formikProps.touched.password &&
+                        formikProps.errors.password ? (
                           <ErrorLogo style={globalStyles.errorExlamationMark} />
                         ) : null}
                         <Text style={globalStyles.errorText}>
@@ -254,7 +264,7 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
                           onPress={formikProps.handleSubmit}
                           colorVariantIndex={0}
                           textColor={textColorWhite}
-                          disabled={areForgotPassButtonsDisabled}
+                          disabled={areForgotFormButtonsDisabled}
                         />
                         <View style={styles.singleButtonWrapper}>
                           <FlatButton
@@ -262,9 +272,7 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
                             onPress={() => navigate('Login')}
                             colorVariantIndex={2}
                             textColor={textColorBlue}
-                            disabled={
-                              areForgotPassButtonsDisabled && !isEmailNotFound
-                            }
+                            disabled={areForgotFormButtonsDisabled}
                           />
                         </View>
                       </View>
