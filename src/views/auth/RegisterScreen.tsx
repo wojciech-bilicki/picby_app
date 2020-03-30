@@ -124,7 +124,10 @@ const RegisterScreen: React.FC<NavTypes> = ({navigation}) => {
       await setIsItServerError(false);
       await registerGraphQLQuery({email: lowerCaseEmail, password});
       await setIsRegisterSuccess(true);
-      resetForm();
+      setTimeout(() => {
+        setAreRegisterButtonsDisabled(false);
+        resetForm();
+      }, ENABLE_BUTTONS_DELAY_TIME);
     } catch (error) {
       let errorCode = error.message;
       Number(errorCode) == 23505
@@ -133,10 +136,6 @@ const RegisterScreen: React.FC<NavTypes> = ({navigation}) => {
     } finally {
       setIsRegisterSuccess(false);
       setIsItServerError(false);
-      setTimeout(
-        () => setAreRegisterButtonsDisabled(false),
-        ENABLE_BUTTONS_DELAY_TIME,
-      );
     }
   };
 

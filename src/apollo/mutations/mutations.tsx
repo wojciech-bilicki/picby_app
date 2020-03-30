@@ -66,7 +66,7 @@ export const UPDATE_ENTRY = gql`
 
 export const CHANGE_PASSWORD = gql`
   mutation changePassword($password: String!, $token: String!) {
-    changePassword(data: {password: $password, token: $token}) {
+    changePassword(data: {token: $token, password: $password}) {
       id
       email
       catalogs {
