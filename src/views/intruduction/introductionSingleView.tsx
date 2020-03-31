@@ -1,19 +1,11 @@
-import React, {useEffect} from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  Dimensions,
-  BackHandler,
-} from 'react-native';
-import PicbyLogo from '../../common/images/PICBY.svg';
-import eyePic from '../../common/images/bigEye.png';
+import React, { useEffect } from 'react';
+import { BackHandler, Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { NavigationStackProp } from 'react-navigation-stack';
 import FlatButton from '../../common/components/Button';
-import {buttonsData} from '../../staticData/staticData';
-import {NavigationStackProp} from 'react-navigation-stack';
-import {useStoreActions} from '../../easyPeasy/hooks';
+import eyePic from '../../common/images/bigEye.png';
+import PicbyLogo from '../../common/images/PICBY.svg';
+import { useStoreActions } from '../../easyPeasy/hooks';
+import { buttonsData } from '../../staticData/staticData';
 
 const {width: vw} = Dimensions.get('window');
 
