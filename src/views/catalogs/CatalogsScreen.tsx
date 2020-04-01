@@ -6,6 +6,7 @@ import {useStoreActions, useStoreState} from '../../easyPeasy/hooks';
 import {useQuery} from '@apollo/react-hooks';
 import {CATALOGS_QUERY} from '../../apollo/queries/queries';
 import CatalogEmptyScreen from './CatalogsEmptyView';
+import CatalogsView from './CatalogsView';
 
 const CatalogsScreen: React.FC = props => {
   const {setUserCatalogs} = useStoreActions(actions => actions.CatalogsModel);
@@ -31,7 +32,7 @@ const CatalogsScreen: React.FC = props => {
         <CatalogEmptyScreen />
       ) : (
         <View>
-          <Text>yolo</Text>
+          <CatalogsView />
         </View>
       )}
     </View>
