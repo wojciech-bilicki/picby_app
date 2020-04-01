@@ -13,6 +13,8 @@ import {TextInput} from 'react-native-gesture-handler';
 import {globalStyles} from '../../../../common/styles/globalStyles';
 import {inputData} from '../../../../staticData/staticData';
 import {useState} from 'react';
+import {ADD_CATALOG} from '../../../../apollo/mutations/mutations';
+import {useMutation} from '@apollo/react-hooks';
 
 const {width: vw} = Dimensions.get('window');
 
@@ -27,9 +29,30 @@ const ModalAddNewCatalog = () => {
   );
   const [newCatalogName, setNewCatalogName] = useState('');
 
+  const [addCatalog] = useMutation(ADD_CATALOG, {
+    onError: error => {
+      console.log(error);
+    },
+    onCompleted: data => {
+      console.log(data.addCatalog, 'dodano katalog');
+      //add to catalogs state//
+    },
+  });
+
   const handleCancelPress = () => {
     toggleIsAddNewCatalogModalVisible(false);
     setNewCatalogName('');
+  };
+
+  const handleOkPress = async (albumName: string) => {
+    if (albumName.length > 1) {
+      try {
+        await addCatalog({variables: {name: albumName}});
+        toggleIsAddNewCatalogModalVisible(false);
+      } catch {
+        throw new Error();
+      }
+    }
   };
   return (
     <View>
@@ -61,7 +84,7 @@ const ModalAddNewCatalog = () => {
                   ANULUJ
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => handleOkPress(newCatalogName)}>
                 <Text style={[styles.buttonText, styles.buttonTwo]}>OK</Text>
               </TouchableOpacity>
             </View>

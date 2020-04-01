@@ -37,7 +37,9 @@ export const CATALOG_QUERY = gql`
 
 export const CATALOGS_QUERY = gql`
   query catalogs {
-    id
-    name
+    catalogs {
+      id
+      name
+    }
   }
 `;
