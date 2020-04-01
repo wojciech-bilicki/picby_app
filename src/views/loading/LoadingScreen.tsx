@@ -1,17 +1,17 @@
 import React from 'react';
 import {
+  Dimensions,
   ScrollView,
   StyleSheet,
   Text,
   View,
-  Dimensions,
   ActivityIndicator,
 } from 'react-native';
-import PicbyLogo from '../../common/images/PICBY.svg';
 import {NavigationStackProp} from 'react-navigation-stack';
+import PicbyLogo from '../../common/images/PICBY.svg';
+import client from '../../../apollo.config';
 import {useQuery} from '@apollo/react-hooks';
 import {ME_QUERY} from '../../apollo/queries/queries';
-import client from '../../../apollo.config';
 
 const {width: vw} = Dimensions.get('window');
 

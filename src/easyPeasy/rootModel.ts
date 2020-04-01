@@ -9,6 +9,7 @@ import RegisterModel, {RegisterStoreModel} from './auth/register/registerModel';
 import ForgotFormModel, {
   ForgotFormStoreModel,
 } from './auth/newPassForm/newPassModel';
+import CatalogsModel, {CatalogsStoreModel} from './catalogs/catalogsModel';
 
 export interface StoreModel {
   IntroductionModel: IntroStoreModel;
@@ -16,6 +17,7 @@ export interface StoreModel {
   LoginModel: LoginStoreModel;
   RegisterModel: RegisterStoreModel;
   ForgotFormModel: ForgotFormStoreModel;
+  CatalogsModel: CatalogsStoreModel;
 }
 
 const model = {
@@ -24,6 +26,7 @@ const model = {
   LoginModel,
   RegisterModel,
   ForgotFormModel,
+  CatalogsModel,
 };
 
 export default model;

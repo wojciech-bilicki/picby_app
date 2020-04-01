@@ -5,6 +5,8 @@ import {catalogsData, commonColors} from '../../staticData/staticData';
 import {globalStyles} from '../../common/styles/globalStyles';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import PlusIcon from '../../common/icons/plus.svg';
+import ModalAddNewCatalog from './components/modalNewCatalog/ModalAddNewCatalog';
+import {useStoreActions} from '../../easyPeasy/hooks';
 
 const {darkRed, lightBlue, orangeRed} = commonColors;
 const {width: vw} = Dimensions.get('window');
@@ -12,8 +14,12 @@ const {width: vw} = Dimensions.get('window');
 const CatalogsScreen: React.FC = props => {
   const {title, subtitle} = catalogsData;
 
+  const {toggleIsAddNewCatalogModalVisible} = useStoreActions(
+    actions => actions.CatalogsModel,
+  );
   return (
     <View style={[globalStyles.screenWrapper]}>
+      <ModalAddNewCatalog />
       <ManWithBoxLogo style={styles.logo} />
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
@@ -21,7 +27,7 @@ const CatalogsScreen: React.FC = props => {
         <TouchableOpacity
           style={styles.plusIconWrapper}
           onPress={() => {
-            console.log('button pressed');
+            toggleIsAddNewCatalogModalVisible(true);
           }}>
           <PlusIcon />
         </TouchableOpacity>
