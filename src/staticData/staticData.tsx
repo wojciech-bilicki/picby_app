@@ -47,6 +47,7 @@ export const buttonsData = {
 
 export const inputData = {
   placeholderTextBlueColor: 'rgba(7, 71, 130, 0.68)',
+  placeholderTextGrayColor: 'rgba(7, 71, 130, 0.3)',
 };
 
 export const introHeaderText = {
