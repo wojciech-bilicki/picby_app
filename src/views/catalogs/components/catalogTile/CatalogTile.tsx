@@ -1,7 +1,8 @@
 import React, {Fragment} from 'react';
 import {View, Text, StyleSheet, Dimensions} from 'react-native';
-import ThreeDots from '../../../../common/icons/settingsThreeDots';
+import ThreeDots from '../../../../common/icons/settingsThreeDots.svg';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+import {useStoreActions} from '../../../../easyPeasy/hooks';
 
 interface TileProps {
   name: string;
@@ -12,12 +13,15 @@ const {width: vw} = Dimensions.get('window');
 
 const CatalogTile = ({name, id}: TileProps) => {
   const catalogId = id;
+  const {toggleIsSettingsModalOpen} = useStoreActions(
+    actions => actions.CatalogsModel,
+  );
   return (
     <View style={styles.tileWrapper}>
       <TouchableOpacity style={styles.catalogTouchArea}>
         <Text style={styles.tileText}>{name}</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.settingsTouchArea}>
+      <TouchableOpacity onPress={() => toggleIsSettingsModalOpen(true)}>
         <View style={styles.numberAndSettings}>
           <Text style={styles.numberOfPhotos}>16</Text>
           <ThreeDots />

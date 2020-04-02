@@ -5,6 +5,7 @@ import {globalStyles} from '../../common/styles/globalStyles';
 import {TouchableOpacity, ScrollView} from 'react-native-gesture-handler';
 import {useStoreState} from '../../easyPeasy/hooks';
 import CatalogTile from './components/catalogTile/CatalogTile';
+import ModalSettings from './components/modalSettings/ModalSettings';
 
 const {width: vw} = Dimensions.get('window');
 
@@ -18,6 +19,7 @@ const CatalogsView: React.FC = props => {
   return (
     <View style={[globalStyles.screenWrapper]}>
       <ScrollView style={styles.listWrapper}>
+        {/* <ModalSettings />  przerasta mnie to dzis */}
         {userCatalogsArray.map((element: {name: string; id: string}) => {
           return (
             <CatalogTile
