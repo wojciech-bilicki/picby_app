@@ -2,8 +2,9 @@ import React, {ReactNode} from 'react';
 import {View, Text, StyleSheet, Dimensions} from 'react-native';
 import {catalogsData, commonColors} from '../../staticData/staticData';
 import {globalStyles} from '../../common/styles/globalStyles';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import {TouchableOpacity, ScrollView} from 'react-native-gesture-handler';
 import {useStoreState} from '../../easyPeasy/hooks';
+import CatalogTile from './components/catalogTile/CatalogTile';
 
 const {width: vw} = Dimensions.get('window');
 
@@ -16,17 +17,25 @@ const CatalogsView: React.FC = props => {
   let userCatalogsArray: userCatalogs = userCatalogs;
   return (
     <View style={[globalStyles.screenWrapper]}>
-      {userCatalogsArray.map((element: {name: string; id: string}) => {
-        return (
-          <View key={element.id}>
-            <Text>{element.name}</Text>
-          </View>
-        );
-      })}
+      <ScrollView style={styles.listWrapper}>
+        {userCatalogsArray.map((element: {name: string; id: string}) => {
+          return (
+            <CatalogTile
+              name={element.name}
+              id={element.id}
+              key={Math.random()}
+            />
+          );
+        })}
+      </ScrollView>
     </View>
   );
 };
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  listWrapper: {
+    width: vw,
+  },
+});
 
 export default CatalogsView;
