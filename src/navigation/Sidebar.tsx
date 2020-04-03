@@ -1,16 +1,20 @@
-import { useMutation } from '@apollo/react-hooks';
-import React, { useEffect, useState } from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { NavigationParams, NavigationRoute } from 'react-navigation';
-import { DrawerActions, DrawerContentComponentProps, DrawerNavigatorItems } from 'react-navigation-drawer';
-import client from '../../apollo.config';
-import { LOGOUT_USER } from '../apollo/mutations/mutations';
+import React, {useState, useEffect} from 'react';
+import {View, StyleSheet, ScrollView, Text, Dimensions} from 'react-native';
+import {
+  DrawerNavigatorItems,
+  DrawerContentComponentProps,
+  DrawerActions,
+} from 'react-navigation-drawer';
 import LogoutIcon from '../common/icons/menuSignOut.svg';
-import { globalStyles } from '../common/styles/globalStyles';
-import { menuColors } from '../staticData/staticData';
+import {globalStyles} from '../common/styles/globalStyles';
+import {menuColors} from '../staticData/staticData';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 import Header from './Header';
-import { omitNavItems } from './nav.utils';
+import {NavigationRoute, NavigationParams} from 'react-navigation';
+import {omitNavItems} from './nav.utils';
+import {useMutation} from '@apollo/react-hooks';
+import {LOGOUT_USER} from '../apollo/mutations/mutations';
+import client from '../../apollo.config';
 
 const {YELLOW_COLOR} = menuColors;
 const {width: vw} = Dimensions.get('window');
@@ -25,7 +29,6 @@ const Sidebar = (
   >(items);
 
   useEffect(() => {
-
     const navItemsAfterFilter = omitNavItems({
       navItems: items,
       omitNavKey: OMIT_NAV_KEY,
