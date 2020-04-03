@@ -7,6 +7,7 @@ import {useQuery} from '@apollo/react-hooks';
 import {CATALOGS_QUERY} from '../../apollo/queries/queries';
 import CatalogEmptyScreen from './CatalogsEmptyView';
 import CatalogsView from './CatalogsView';
+import ModalAddNewCatalog from './components/modalNewCatalog/ModalAddNewCatalog';
 
 const CatalogsScreen: React.FC = props => {
   const {setUserCatalogs} = useStoreActions(actions => actions.CatalogsModel);
@@ -26,14 +27,13 @@ const CatalogsScreen: React.FC = props => {
 
   return (
     <View style={[globalStyles.screenWrapper]}>
+      <ModalAddNewCatalog />
       {loading ? (
         <ActivityIndicator size={120} />
       ) : userCatalogs == [] ? (
         <CatalogEmptyScreen />
       ) : (
-        <View>
-          <CatalogsView />
-        </View>
+        <CatalogsView />
       )}
     </View>
   );

@@ -24,8 +24,7 @@ const LoadingScreen: React.FC<Props> = ({navigation}) => {
     navigation.navigate({routeName: screenName});
   };
 
-  const { loading,
-    error, data } = useQuery(ME_QUERY, {
+  const {loading, error, data} = useQuery(ME_QUERY, {
     onError: () => {
       console.log(error);
     },

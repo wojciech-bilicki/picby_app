@@ -6,8 +6,9 @@ import {TouchableOpacity, ScrollView} from 'react-native-gesture-handler';
 import {useStoreState} from '../../easyPeasy/hooks';
 import CatalogTile from './components/catalogTile/CatalogTile';
 import ModalSettings from './components/modalSettings/ModalSettings';
+import PlusButton from './components/plusButton/PlusButton';
 
-const {width: vw} = Dimensions.get('window');
+const {width: vw, height: vh} = Dimensions.get('window');
 
 interface userCatalogs {
   [index: number]: {id: string; name: string};
@@ -30,6 +31,7 @@ const CatalogsView: React.FC = props => {
           );
         })}
       </ScrollView>
+      <PlusButton />
     </View>
   );
 };
@@ -37,6 +39,7 @@ const CatalogsView: React.FC = props => {
 const styles = StyleSheet.create({
   listWrapper: {
     width: vw,
+    maxHeight: 0.7 * vh,
   },
 });
 
