@@ -1,7 +1,17 @@
 import React from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { NavigationStackProp } from 'react-navigation-stack';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Dimensions,
+  ActivityIndicator,
+} from 'react-native';
 import PicbyLogo from '../../common/images/PICBY.svg';
+import {NavigationStackProp} from 'react-navigation-stack';
+import {useQuery} from '@apollo/react-hooks';
+import {ME_QUERY} from '../../apollo/queries/queries';
+import client from '../../../apollo.config';
 
 const {width: vw} = Dimensions.get('window');
 
@@ -14,20 +24,20 @@ const LoadingScreen: React.FC<Props> = ({navigation}) => {
     navigation.navigate({routeName: screenName});
   };
 
-  // const {error, data} = useQuery(ME_QUERY, {
-  //   onError: () => {
-  //     console.log(error);
-  //   },
-  //   onCompleted: () => {
-  //     const userId = data?.me;
-  //     if (userId) {
-  //       navigateToOtherScreen('Catalogs');
-  //     } else {
-  //       client.cache.reset();
-  //       navigateToOtherScreen('Intro');
-  //     }
-  //   },
-  // });
+  const {error, data} = useQuery(ME_QUERY, {
+    onError: () => {
+      console.log(error);
+    },
+    onCompleted: () => {
+      const userId = data?.me;
+      if (userId) {
+        navigateToOtherScreen('Catalogs');
+      } else {
+        client.cache.reset();
+        navigateToOtherScreen('Intro');
+      }
+    },
+  });
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -38,8 +48,7 @@ const LoadingScreen: React.FC<Props> = ({navigation}) => {
           <PicbyLogo style={[styles.logo, styles.logoThirdScreen]} />
         </View>
         <View style={styles.content}>
-          <Text>Działa</Text>
-          {/* <ActivityIndicator size={120} color={'#3180AE'} /> */}
+          <ActivityIndicator size={120} color={'#3180AE'} />
         </View>
       </View>
     </ScrollView>
