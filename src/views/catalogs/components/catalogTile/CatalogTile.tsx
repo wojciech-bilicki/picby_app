@@ -17,7 +17,11 @@ const CatalogTile = ({name, id}: TileProps) => {
     actions => actions.CatalogsModel,
   );
   return (
-    <View style={styles.tileWrapper}>
+    <View
+      style={styles.tileWrapper}
+      onTouchStart={e => {
+        console.log('touchMove', e.nativeEvent.pageY);
+      }}>
       <TouchableOpacity style={styles.catalogTouchArea}>
         <Text style={styles.tileText}>{name}</Text>
       </TouchableOpacity>

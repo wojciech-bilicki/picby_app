@@ -1,4 +1,4 @@
-import React, {ReactNode} from 'react';
+import React, {ReactNode, useState} from 'react';
 import {View, Text, StyleSheet, Dimensions} from 'react-native';
 import {catalogsData, commonColors} from '../../staticData/staticData';
 import {globalStyles} from '../../common/styles/globalStyles';
@@ -17,10 +17,12 @@ interface userCatalogs {
 const CatalogsView: React.FC = props => {
   const {userCatalogs} = useStoreState(state => state.CatalogsModel);
   let userCatalogsArray: userCatalogs = userCatalogs;
+  const [touchCoordinates, setTouchCoordinates] = useState();
+
+  // touchCoordinates = { touchCoordinates }
   return (
     <View style={[globalStyles.screenWrapper]}>
       <ScrollView style={styles.listWrapper}>
-        {/* <ModalSettings />  przerasta mnie to dzis */}
         {userCatalogsArray.map((element: {name: string; id: string}) => {
           return (
             <CatalogTile
@@ -32,6 +34,7 @@ const CatalogsView: React.FC = props => {
         })}
       </ScrollView>
       <PlusButton />
+      <ModalSettings />
     </View>
   );
 };
