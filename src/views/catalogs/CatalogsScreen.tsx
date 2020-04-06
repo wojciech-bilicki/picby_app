@@ -74,10 +74,10 @@ const CatalogsScreen: React.FC = props => {
       />
       {loading ? (
         <ActivityIndicator size={120} />
-      ) : userCatalogs == [] ? (
-        <CatalogEmptyScreen />
-      ) : (
+      ) : userCatalogs.length ? (
         <CatalogsView />
+      ) : (
+        <CatalogEmptyScreen />
       )}
     </View>
   );

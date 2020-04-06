@@ -13,19 +13,23 @@ import {useEffect} from 'react';
 const {width: vw, height: vh} = Dimensions.get('window');
 
 const ModalSettings = () => {
-  const {toggleIsSettingsModalOpen} = useStoreActions(
-    actions => actions.CatalogsModel,
-  );
+  const {
+    toggleIsSettingsModalOpen,
+    setSettingsCatalogId,
+    setIsDeleteModalOpen,
+  } = useStoreActions(actions => actions.CatalogsModel);
   const {isSettingsModalOpen} = useStoreState(state => state.CatalogsModel);
 
   const handleCancelPress = () => {
     toggleIsSettingsModalOpen(false);
+    setSettingsCatalogId(undefined);
   };
-  const handleEditPress = () => {
-    console.log('click edit');
+  const handleEditPress = async () => {
+    await toggleIsSettingsModalOpen(false);
   };
-  const handleDeletePress = () => {
-    console.log('click delete');
+  const handleDeletePress = async () => {
+    await toggleIsSettingsModalOpen(false);
+    setIsDeleteModalOpen(true);
   };
 
   useEffect(() => {

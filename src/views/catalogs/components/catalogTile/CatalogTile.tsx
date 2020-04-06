@@ -13,15 +13,21 @@ const {width: vw} = Dimensions.get('window');
 
 const CatalogTile = ({name, id}: TileProps) => {
   const catalogId = id;
-  const {toggleIsSettingsModalOpen} = useStoreActions(
+  const {toggleIsSettingsModalOpen, setSettingsCatalogId} = useStoreActions(
     actions => actions.CatalogsModel,
   );
+
+  const handlePress = () => {
+    toggleIsSettingsModalOpen(true);
+    setSettingsCatalogId(id);
+  };
+
   return (
     <View style={styles.tileWrapper}>
       <TouchableOpacity style={styles.catalogTouchArea}>
         <Text style={styles.tileText}>{name}</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => toggleIsSettingsModalOpen(true)}>
+      <TouchableOpacity onPress={handlePress}>
         <View style={styles.numberAndSettings}>
           <Text style={styles.numberOfPhotos}>16</Text>
           <ThreeDots />

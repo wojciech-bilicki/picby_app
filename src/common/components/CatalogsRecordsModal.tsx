@@ -103,19 +103,21 @@ const styles = StyleSheet.create({
     paddingBottom: 18,
   },
   inputWrapper: {
-    height: 0.29 * vw,
     backgroundColor: 'white',
     borderWidth: 0.25,
     borderColor: '#074782',
     display: 'flex',
     alignItems: 'center',
-    paddingTop: 0.043 * vw,
+    justifyContent: 'center',
+    paddingTop: 0.05 * vw,
+    paddingBottom: 0.05 * vw,
   },
   input: {
     paddingLeft: 5,
     fontSize: 16,
     borderBottomWidth: 2,
     borderBottomColor: 'rgba(231, 47, 47, 0.7)',
+    marginBottom: 0.05 * vw,
   },
   buttonsWrapper: {
     height: 0.15 * vw,

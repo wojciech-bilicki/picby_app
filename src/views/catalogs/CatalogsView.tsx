@@ -3,10 +3,13 @@ import {View, Text, StyleSheet, Dimensions} from 'react-native';
 import {catalogsData, commonColors} from '../../staticData/staticData';
 import {globalStyles} from '../../common/styles/globalStyles';
 import {TouchableOpacity, ScrollView} from 'react-native-gesture-handler';
-import {useStoreState} from '../../easyPeasy/hooks';
+import {useStoreState, useStoreActions} from '../../easyPeasy/hooks';
 import CatalogTile from './components/catalogTile/CatalogTile';
 import ModalSettings from './components/modalSettings/ModalSettings';
 import PlusButton from './components/plusButton/PlusButton';
+import CatalogsRecordsModal from '../../common/components/CatalogsRecordsModal';
+import {useMutation} from '@apollo/react-hooks';
+import {REMOVE_CATALOG} from '../../apollo/mutations/mutations';
 
 const {width: vw, height: vh} = Dimensions.get('window');
 
@@ -16,8 +19,42 @@ interface userCatalogs {
 }
 
 const CatalogsView: React.FC = props => {
-  const {userCatalogs} = useStoreState(state => state.CatalogsModel);
+  const {userCatalogs, isDeleteModalOpen, settingsCatalogId} = useStoreState(
+    state => state.CatalogsModel,
+  );
+  const {
+    setIsDeleteModalOpen,
+    setUserCatalogs,
+    setSettingsCatalogId,
+  } = useStoreActions(actions => actions.CatalogsModel);
 
+  const [deleteCatalog] = useMutation(REMOVE_CATALOG, {
+    onError: () => {
+      throw new Error();
+    },
+    onCompleted: () => {
+      console.log('usunięto');
+      const userCatalogsAfterDelete = userCatalogs.filter(catalog => {
+        return catalog.id !== settingsCatalogId;
+      });
+      setUserCatalogs([...userCatalogsAfterDelete]);
+      setSettingsCatalogId(undefined);
+      setIsDeleteModalOpen(false);
+    },
+  });
+
+  const handleCloseDeleteModal = () => {
+    setSettingsCatalogId(undefined);
+    setIsDeleteModalOpen(false);
+  };
+
+  const handleDeleteCatalog = async () => {
+    try {
+      await deleteCatalog({variables: {id: settingsCatalogId}});
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <View style={[globalStyles.screenWrapper]}>
       <ScrollView style={styles.listWrapper}>
@@ -33,6 +70,16 @@ const CatalogsView: React.FC = props => {
       </ScrollView>
       <PlusButton />
       <ModalSettings />
+      <CatalogsRecordsModal
+        isModalVisible={isDeleteModalOpen}
+        setIsModalVisible={setIsDeleteModalOpen}
+        submitFunction={handleDeleteCatalog}
+        cancelFunction={handleCloseDeleteModal}
+        contentText={'Czy na pewno chcesz usunąć ten katalog?'}
+        headerText={'Usuń katalog'}
+        isTextInputVisible={false}
+        submitText={'USUŃ'}
+      />
     </View>
   );
 };

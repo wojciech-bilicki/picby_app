@@ -7,6 +7,7 @@ interface userCatalog {
 export interface CatalogsStoreModel {
   isAddNewCatalogModalVisible: boolean;
   isSettingsModalOpen: boolean;
+  isDeleteModalOpen: boolean;
   userCatalogs: userCatalog[] | [];
   toggleIsAddNewCatalogModalVisible: Action<CatalogsStoreModel, boolean>;
   resetCatalogsScreenToDefault: Thunk<CatalogsStoreModel, number>;
@@ -14,12 +15,17 @@ export interface CatalogsStoreModel {
   toggleIsSettingsModalOpen: Action<CatalogsStoreModel, boolean>;
   newAlbumName: string;
   setNewAlbumName: Action<CatalogsStoreModel, string>;
+  settingsCatalogId: string | undefined;
+  setSettingsCatalogId: Action<CatalogsStoreModel, string | undefined>;
+  setIsDeleteModalOpen: Action<CatalogsStoreModel, boolean>;
 }
 const CatalogsModel: CatalogsStoreModel = {
   isAddNewCatalogModalVisible: false,
   isSettingsModalOpen: false,
   userCatalogs: [],
   newAlbumName: '',
+  isDeleteModalOpen: false,
+  settingsCatalogId: undefined,
   toggleIsAddNewCatalogModalVisible: action((state, payload) => {
     state.isAddNewCatalogModalVisible = payload;
   }),
@@ -34,6 +40,12 @@ const CatalogsModel: CatalogsStoreModel = {
   }),
   setNewAlbumName: action((state, payload) => {
     state.newAlbumName = payload;
+  }),
+  setSettingsCatalogId: action((state, payload) => {
+    state.settingsCatalogId = payload;
+  }),
+  setIsDeleteModalOpen: action((state, payload) => {
+    state.isDeleteModalOpen = payload;
   }),
 };
 
