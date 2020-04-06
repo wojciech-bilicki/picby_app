@@ -1,45 +1,25 @@
-import React, {useState, useEffect} from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  Dimensions,
-  TextInput,
-  KeyboardAvoidingView,
-} from 'react-native';
-
-import {dismissKeyboard} from '../../common/utils.global';
-import eyePic from '../../common/images/bigEye.png';
-import FlatButton from '../../common/components/Button';
-import {Formik} from 'formik';
+import { useMutation } from '@apollo/react-hooks';
+import { Formik } from 'formik';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, Image, KeyboardAvoidingView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ScrollView, TouchableOpacity, TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { NavigationStackProp } from 'react-navigation-stack';
 import * as yup from 'yup';
-import PasswordVisibleIcon from '../../common/icons/passwordShownEye.svg';
-import PasswordInvisibleIcon from '../../common/icons/passwordHiddenEye.svg';
-import ErrorLogo from './icons/exclamationMark.svg';
-import {
-  TouchableWithoutFeedback,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native-gesture-handler';
-import {globalStyles} from '../../common/styles/globalStyles';
-import {
-  useHandlePopupAnimation,
-  ENABLE_BUTTONS_DELAY_TIME,
-} from './hooks/useHandlePopupAnimation';
-import PopUp from './components/Popup';
-import {
-  forgotPasswordMessages,
-  inputData,
-  buttonsData,
-} from '../../staticData/staticData';
-import {NavigationStackProp} from 'react-navigation-stack';
-import {useStoreActions, useStoreState} from '../../easyPeasy/hooks';
-import {registerMessages} from '../../staticData/staticData';
-import KeyLogo from './icons/key.svg';
-import {useMutation} from '@apollo/react-hooks';
-import {CHANGE_PASSWORD} from '../../apollo/mutations/mutations';
 import client from '../../../apollo.config';
+import { CHANGE_PASSWORD } from '../../apollo/mutations/mutations';
+import FlatButton from '../../common/components/Button';
+import PasswordInvisibleIcon from '../../common/icons/passwordHiddenEye.svg';
+import PasswordVisibleIcon from '../../common/icons/passwordShownEye.svg';
+import eyePic from '../../common/images/bigEye.png';
+import { globalStyles } from '../../common/styles/globalStyles';
+import { dismissKeyboard } from '../../common/utils.global';
+import { useStoreActions, useStoreState } from '../../easyPeasy/hooks';
+import { buttonsData, forgotPasswordMessages, inputData, registerMessages } from '../../staticData/staticData';
+import PopUp from './components/Popup';
+import { ENABLE_BUTTONS_DELAY_TIME, useHandlePopupAnimation } from './hooks/useHandlePopupAnimation';
+import ErrorLogo from './icons/exclamationMark.svg';
+import KeyLogo from './icons/key.svg';
+
 
 const {width: vw, height: vh} = Dimensions.get('window');
 const {messagePasswordNotSimilar, messageFieldRequired} = registerMessages;
@@ -73,7 +53,7 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
   const {navigate} = navigation;
   const {handlePopUpAnimation, fadeAnim} = useHandlePopupAnimation();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [userTokenValue, setUserTokenValue] = useState();
+  const [userTokenValue, setUserTokenValue] = useState("");
 
   const {
     setAreForgotFormButtonsDisabled,
@@ -130,7 +110,7 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
     try {
       setAreForgotFormButtonsDisabled(true);
       await setIsItForgotFormServerError(false);
-      await changePassGraphQLQuery({password, token: userTokenValue});
+      await changePassGraphQLQuery({password, token: userTokenValue!});
       await setIsEmailSendSuccess(true);
       setTimeout(() => {
         setAreForgotFormButtonsDisabled(false);
@@ -169,6 +149,7 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
 
   useEffect(() => {
     const userToken: userTokenType = navigation.getParam('token');
+    console.log(userToken);
     userToken && setUserTokenValue(userToken);
   }, []);
 

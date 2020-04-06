@@ -1,84 +1,87 @@
+import { useMutation, useQuery } from '@apollo/react-hooks';
 import React from 'react';
-import {View, Text, StyleSheet, Dimensions} from 'react-native';
-import ManWithBoxLogo from './icons/man.svg';
-import {catalogsData, commonColors} from '../../staticData/staticData';
-import {globalStyles} from '../../common/styles/globalStyles';
-import {TouchableOpacity} from 'react-native-gesture-handler';
-import PlusIcon from '../../common/icons/plus.svg';
+import { ActivityIndicator, View } from 'react-native';
+import { ADD_CATALOG } from '../../apollo/mutations/mutations';
+import { CATALOGS_QUERY } from '../../apollo/queries/queries';
+import CatalogsRecordsModal from '../../common/components/CatalogsRecordsModal';
+import { globalStyles } from '../../common/styles/globalStyles';
+import { useStoreActions, useStoreState } from '../../easyPeasy/hooks';
+import CatalogEmptyScreen from './CatalogsEmptyView';
+import CatalogsView from './CatalogsView';
 
-const {darkRed, lightBlue, orangeRed} = commonColors;
-const {width: vw} = Dimensions.get('window');
 
 const CatalogsScreen: React.FC = props => {
-  const {title, subtitle} = catalogsData;
+  const {
+    setUserCatalogs,
+    toggleIsAddNewCatalogModalVisible,
+    setNewAlbumName,
+  } = useStoreActions(actions => actions.CatalogsModel);
+
+  const {
+    userCatalogs,
+    isAddNewCatalogModalVisible,
+    newAlbumName,
+  } = useStoreState(state => state.CatalogsModel);
+
+  const [addCatalog] = useMutation(ADD_CATALOG, {
+    onError: () => {
+      throw new Error();
+    },
+    onCompleted: data => {
+      const newCatalog = data.addCatalog;
+      setUserCatalogs([...userCatalogs, newCatalog]);
+    },
+  });
+
+  const {error, loading} = useQuery(CATALOGS_QUERY, {
+    onError: () => {
+      console.log(error);
+    },
+    onCompleted: data => {
+      console.log(data);
+      const catalogs = data.catalogs;
+      setUserCatalogs(catalogs);
+    },
+  });
+
+  const handleAddNewCatalog = async () => {
+    if (newAlbumName.length > 1) {
+      try {
+        await addCatalog({variables: {name: newAlbumName}});
+        setNewAlbumName('');
+        toggleIsAddNewCatalogModalVisible(false);
+      } catch {
+        throw new Error();
+      }
+    }
+  };
+  const handleCancelAddNewCatalog = async () => {
+    await setNewAlbumName('');
+    toggleIsAddNewCatalogModalVisible(false);
+  };
 
   return (
     <View style={[globalStyles.screenWrapper]}>
-      <ManWithBoxLogo style={styles.logo} />
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.subtitle}>{subtitle}</Text>
-      <View style={styles.plusIconView}>
-        <TouchableOpacity
-          style={styles.plusIconWrapper}
-          onPress={() => {
-            console.log('button pressed');
-          }}>
-          <PlusIcon />
-        </TouchableOpacity>
-      </View>
+      <CatalogsRecordsModal
+        isModalVisible={isAddNewCatalogModalVisible}
+        setIsModalVisible={toggleIsAddNewCatalogModalVisible}
+        submitFunction={handleAddNewCatalog}
+        cancelFunction={handleCancelAddNewCatalog}
+        headerText={'Wprowadź nazwę nowego albumu'}
+        inputValue={newAlbumName}
+        setInputValue={setNewAlbumName}
+        isTextInputVisible={true}
+        submitText={'OK'}
+      />
+      {loading ? (
+        <ActivityIndicator size={120} />
+      ) : userCatalogs.length ? (
+        <CatalogsView />
+      ) : (
+        <CatalogEmptyScreen />
+      )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  logo: {
-    marginTop: 0.15 * vw,
-    minWidth: 0.625 * vw,
-    minHeight: 0.487 * vw,
-  },
-  title: {
-    color: darkRed,
-    fontSize: 0.056 * vw,
-    fontWeight: 'bold',
-    marginTop: 0.118 * vw,
-  },
-  subtitle: {
-    color: lightBlue,
-    textAlign: 'center',
-    fontSize: 0.045 * vw,
-    marginTop: 0.118 * vw,
-    lineHeight: 25,
-  },
-  plusIconWrapper: {
-    minHeight: 0.175 * vw,
-    minWidth: 0.175 * vw,
-    maxHeight: 0.175 * vw,
-    maxWidth: 0.175 * vw,
-    borderRadius: 0.0875 * vw,
-    backgroundColor: orangeRed,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: 'rgba(0, 0, 0, 0.2)',
-    shadowOffset: {
-      width: 8,
-      height: 10,
-    },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 10,
-  },
-  plusIcon: {
-    maxHeight: 0.175 * vw,
-    maxWidth: 0.175 * vw,
-    alignSelf: 'flex-end',
-    justifyContent: 'flex-end',
-  },
-  plusIconView: {
-    width: vw,
-    alignItems: 'flex-end',
-    paddingRight: 0.0625 * vw,
-    marginTop: 0.076 * vw,
-  },
-});
 
 export default CatalogsScreen;

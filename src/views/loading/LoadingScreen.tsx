@@ -1,17 +1,10 @@
+import { useQuery } from '@apollo/react-hooks';
 import React from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  Dimensions,
-  ActivityIndicator,
-} from 'react-native';
-import PicbyLogo from '../../common/images/PICBY.svg';
-import {NavigationStackProp} from 'react-navigation-stack';
-import {useQuery} from '@apollo/react-hooks';
-import {ME_QUERY} from '../../apollo/queries/queries';
+import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { NavigationStackProp } from 'react-navigation-stack';
 import client from '../../../apollo.config';
+import { ME_QUERY } from '../../apollo/queries/queries';
+import PicbyLogo from '../../common/images/PICBY.svg';
 
 const {width: vw} = Dimensions.get('window');
 
@@ -24,7 +17,7 @@ const LoadingScreen: React.FC<Props> = ({navigation}) => {
     navigation.navigate({routeName: screenName});
   };
 
-  const {error, data} = useQuery(ME_QUERY, {
+  const {loading, error, data} = useQuery(ME_QUERY, {
     onError: () => {
       console.log(error);
     },
