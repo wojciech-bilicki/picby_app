@@ -9,7 +9,7 @@ import ModalSettings from './components/modalSettings/ModalSettings';
 import PlusButton from './components/plusButton/PlusButton';
 import CatalogsRecordsModal from '../../common/components/CatalogsRecordsModal';
 import {useMutation} from '@apollo/react-hooks';
-import {REMOVE_CATALOG} from '../../apollo/mutations/mutations';
+import {REMOVE_CATALOG, UPDATE_CATALOG} from '../../apollo/mutations/mutations';
 
 const {width: vw, height: vh} = Dimensions.get('window');
 
@@ -19,13 +19,19 @@ interface userCatalogs {
 }
 
 const CatalogsView: React.FC = props => {
-  const {userCatalogs, isDeleteModalOpen, settingsCatalogId} = useStoreState(
-    state => state.CatalogsModel,
-  );
+  const {
+    userCatalogs,
+    isDeleteModalOpen,
+    settingsCatalogId,
+    isEditModalOpen,
+    updateNameValue,
+  } = useStoreState(state => state.CatalogsModel);
   const {
     setIsDeleteModalOpen,
     setUserCatalogs,
     setSettingsCatalogId,
+    setIsEditModalOpen,
+    setUpdateNameValue,
   } = useStoreActions(actions => actions.CatalogsModel);
 
   const [deleteCatalog] = useMutation(REMOVE_CATALOG, {
@@ -43,6 +49,23 @@ const CatalogsView: React.FC = props => {
     },
   });
 
+  const [updateCatalog] = useMutation(UPDATE_CATALOG, {
+    onError: error => {
+      console.log(error, 'line 53');
+    },
+    onCompleted: data => {
+      const refreshedCatalog = data;
+      console.log(refreshedCatalog);
+      // setUserCatalogs();
+    },
+  });
+
+  const handleCloseEditModal = () => {
+    setSettingsCatalogId(undefined);
+    setUpdateNameValue('');
+    setIsEditModalOpen(false);
+  };
+
   const handleCloseDeleteModal = () => {
     setSettingsCatalogId(undefined);
     setIsDeleteModalOpen(false);
@@ -55,6 +78,20 @@ const CatalogsView: React.FC = props => {
       console.log(error);
     }
   };
+
+  const handleChangeCatalogName = async () => {
+    console.log(settingsCatalogId, updateNameValue);
+    console.log(typeof settingsCatalogId, typeof updateNameValue);
+
+    try {
+      await updateCatalog({
+        variables: {name: updateNameValue, id: settingsCatalogId},
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <View style={[globalStyles.screenWrapper]}>
       <ScrollView style={styles.listWrapper}>
@@ -79,6 +116,17 @@ const CatalogsView: React.FC = props => {
         headerText={'Usuń katalog'}
         isTextInputVisible={false}
         submitText={'USUŃ'}
+      />
+      <CatalogsRecordsModal
+        isModalVisible={isEditModalOpen}
+        setIsModalVisible={setIsEditModalOpen}
+        submitFunction={handleChangeCatalogName}
+        cancelFunction={handleCloseEditModal}
+        headerText={'Zmień nazwę katalogu'}
+        isTextInputVisible={true}
+        submitText={'OK'}
+        inputValue={updateNameValue}
+        setInputValue={setUpdateNameValue}
       />
     </View>
   );

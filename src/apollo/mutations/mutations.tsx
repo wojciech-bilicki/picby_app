@@ -15,7 +15,7 @@ export const REMOVE_CATALOG = gql`
   }
 `;
 
-export const UPDATE_CATALAOG = gql`
+export const UPDATE_CATALOG = gql`
   mutation updateCatalog($name: String, $id: String) {
     updateCatalog(data: {name: $name, id: $id}) {
       id

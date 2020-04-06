@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {View, Text, StyleSheet, ActivityIndicator} from 'react-native';
+import React from 'react';
+import {View, ActivityIndicator} from 'react-native';
 
 import {globalStyles} from '../../common/styles/globalStyles';
 import {useStoreActions, useStoreState} from '../../easyPeasy/hooks';
@@ -16,11 +16,33 @@ const CatalogsScreen: React.FC = props => {
     toggleIsAddNewCatalogModalVisible,
     setNewAlbumName,
   } = useStoreActions(actions => actions.CatalogsModel);
+
   const {
     userCatalogs,
     isAddNewCatalogModalVisible,
     newAlbumName,
   } = useStoreState(state => state.CatalogsModel);
+
+  const [addCatalog] = useMutation(ADD_CATALOG, {
+    onError: () => {
+      throw new Error();
+    },
+    onCompleted: data => {
+      const newCatalog = data.addCatalog;
+      setUserCatalogs([...userCatalogs, newCatalog]);
+    },
+  });
+
+  const {error, loading} = useQuery(CATALOGS_QUERY, {
+    onError: () => {
+      console.log(error);
+    },
+    onCompleted: data => {
+      console.log(data);
+      const catalogs = data.catalogs;
+      setUserCatalogs(catalogs);
+    },
+  });
 
   const handleAddNewCatalog = async () => {
     if (newAlbumName.length > 1) {
@@ -37,27 +59,6 @@ const CatalogsScreen: React.FC = props => {
     await setNewAlbumName('');
     toggleIsAddNewCatalogModalVisible(false);
   };
-
-  const [addCatalog] = useMutation(ADD_CATALOG, {
-    onError: error => {
-      console.log(error);
-    },
-    onCompleted: data => {
-      console.log(data.addCatalog, 'dodano katalog');
-      const newCatalog = data.addCatalog;
-      setUserCatalogs([...userCatalogs, newCatalog]);
-    },
-  });
-  const {error, loading} = useQuery(CATALOGS_QUERY, {
-    onError: () => {
-      console.log(error);
-    },
-    onCompleted: data => {
-      console.log(data);
-      const catalogs = data.catalogs;
-      setUserCatalogs(catalogs);
-    },
-  });
 
   return (
     <View style={[globalStyles.screenWrapper]}>
@@ -82,7 +83,5 @@ const CatalogsScreen: React.FC = props => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({});
 
 export default CatalogsScreen;

@@ -17,6 +17,7 @@ const ModalSettings = () => {
     toggleIsSettingsModalOpen,
     setSettingsCatalogId,
     setIsDeleteModalOpen,
+    setIsEditModalOpen,
   } = useStoreActions(actions => actions.CatalogsModel);
   const {isSettingsModalOpen} = useStoreState(state => state.CatalogsModel);
 
@@ -26,6 +27,7 @@ const ModalSettings = () => {
   };
   const handleEditPress = async () => {
     await toggleIsSettingsModalOpen(false);
+    setIsEditModalOpen(true);
   };
   const handleDeletePress = async () => {
     await toggleIsSettingsModalOpen(false);
