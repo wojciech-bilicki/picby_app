@@ -8,18 +8,11 @@ import {
   Text,
 } from 'react-native';
 import {useStoreState, useStoreActions} from '../../../../easyPeasy/hooks';
-
-import {inputData} from '../../../../staticData/staticData';
-import {TouchableWithoutFeedback} from 'react-native-gesture-handler';
 import {useEffect} from 'react';
+
 const {width: vw, height: vh} = Dimensions.get('window');
 
-interface PropsTypes {
-  touchCoordinates: number;
-}
 const ModalSettings = () => {
-  const {placeholderTextGrayColor} = inputData;
-
   const {toggleIsSettingsModalOpen} = useStoreActions(
     actions => actions.CatalogsModel,
   );

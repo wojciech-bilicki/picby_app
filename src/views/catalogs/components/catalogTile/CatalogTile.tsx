@@ -1,4 +1,4 @@
-import React, {Fragment} from 'react';
+import React, {Fragment, useState} from 'react';
 import {View, Text, StyleSheet, Dimensions} from 'react-native';
 import ThreeDots from '../../../../common/icons/settingsThreeDots.svg';
 import {TouchableOpacity} from 'react-native-gesture-handler';
@@ -17,11 +17,7 @@ const CatalogTile = ({name, id}: TileProps) => {
     actions => actions.CatalogsModel,
   );
   return (
-    <View
-      style={styles.tileWrapper}
-      onTouchStart={e => {
-        console.log('touchMove', e.nativeEvent.pageY);
-      }}>
+    <View style={styles.tileWrapper}>
       <TouchableOpacity style={styles.catalogTouchArea}>
         <Text style={styles.tileText}>{name}</Text>
       </TouchableOpacity>

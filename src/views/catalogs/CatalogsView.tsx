@@ -11,19 +11,17 @@ import PlusButton from './components/plusButton/PlusButton';
 const {width: vw, height: vh} = Dimensions.get('window');
 
 interface userCatalogs {
-  [index: number]: {id: string; name: string};
-  map: Function;
+  id: string;
+  name: string;
 }
+
 const CatalogsView: React.FC = props => {
   const {userCatalogs} = useStoreState(state => state.CatalogsModel);
-  let userCatalogsArray: userCatalogs = userCatalogs;
-  const [touchCoordinates, setTouchCoordinates] = useState();
 
-  // touchCoordinates = { touchCoordinates }
   return (
     <View style={[globalStyles.screenWrapper]}>
       <ScrollView style={styles.listWrapper}>
-        {userCatalogsArray.map((element: {name: string; id: string}) => {
+        {(userCatalogs as Array<userCatalogs>).map(element => {
           return (
             <CatalogTile
               name={element.name}

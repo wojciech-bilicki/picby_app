@@ -3,23 +3,57 @@ import {View, Text, StyleSheet, ActivityIndicator} from 'react-native';
 
 import {globalStyles} from '../../common/styles/globalStyles';
 import {useStoreActions, useStoreState} from '../../easyPeasy/hooks';
-import {useQuery} from '@apollo/react-hooks';
+import {useQuery, useMutation} from '@apollo/react-hooks';
 import {CATALOGS_QUERY} from '../../apollo/queries/queries';
 import CatalogEmptyScreen from './CatalogsEmptyView';
 import CatalogsView from './CatalogsView';
-import ModalAddNewCatalog from './components/modalNewCatalog/ModalAddNewCatalog';
+import CatalogsRecordsModal from '../../common/components/CatalogsRecordsModal';
+import {ADD_CATALOG} from '../../apollo/mutations/mutations';
 
 const CatalogsScreen: React.FC = props => {
-  const {setUserCatalogs} = useStoreActions(actions => actions.CatalogsModel);
-  const {userCatalogs} = useStoreState(state => state.CatalogsModel);
+  const {
+    setUserCatalogs,
+    toggleIsAddNewCatalogModalVisible,
+    setNewAlbumName,
+  } = useStoreActions(actions => actions.CatalogsModel);
+  const {
+    userCatalogs,
+    isAddNewCatalogModalVisible,
+    newAlbumName,
+  } = useStoreState(state => state.CatalogsModel);
 
+  const handleAddNewCatalog = async () => {
+    if (newAlbumName.length > 1) {
+      try {
+        await addCatalog({variables: {name: newAlbumName}});
+        setNewAlbumName('');
+        toggleIsAddNewCatalogModalVisible(false);
+      } catch {
+        throw new Error();
+      }
+    }
+  };
+  const handleCancelAddNewCatalog = async () => {
+    await setNewAlbumName('');
+    toggleIsAddNewCatalogModalVisible(false);
+  };
+
+  const [addCatalog] = useMutation(ADD_CATALOG, {
+    onError: error => {
+      console.log(error);
+    },
+    onCompleted: data => {
+      console.log(data.addCatalog, 'dodano katalog');
+      const newCatalog = data.addCatalog;
+      setUserCatalogs([...userCatalogs, newCatalog]);
+    },
+  });
   const {error, loading} = useQuery(CATALOGS_QUERY, {
     onError: () => {
       console.log(error);
     },
     onCompleted: data => {
       console.log(data);
-      //set catalogs data state
       const catalogs = data.catalogs;
       setUserCatalogs(catalogs);
     },
@@ -27,7 +61,17 @@ const CatalogsScreen: React.FC = props => {
 
   return (
     <View style={[globalStyles.screenWrapper]}>
-      <ModalAddNewCatalog />
+      <CatalogsRecordsModal
+        isModalVisible={isAddNewCatalogModalVisible}
+        setIsModalVisible={toggleIsAddNewCatalogModalVisible}
+        submitFunction={handleAddNewCatalog}
+        cancelFunction={handleCancelAddNewCatalog}
+        headerText={'Wprowadź nazwę nowego albumu'}
+        inputValue={newAlbumName}
+        setInputValue={setNewAlbumName}
+        isTextInputVisible={true}
+        submitText={'OK'}
+      />
       {loading ? (
         <ActivityIndicator size={120} />
       ) : userCatalogs == [] ? (
