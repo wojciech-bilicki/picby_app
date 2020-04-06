@@ -1,17 +1,10 @@
+import { useQuery } from '@apollo/react-hooks';
 import React from 'react';
-import {
-  Dimensions,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  ActivityIndicator,
-} from 'react-native';
-import {NavigationStackProp} from 'react-navigation-stack';
-import PicbyLogo from '../../common/images/PICBY.svg';
+import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { NavigationStackProp } from 'react-navigation-stack';
 import client from '../../../apollo.config';
-import {useQuery} from '@apollo/react-hooks';
-import {ME_QUERY} from '../../apollo/queries/queries';
+import { ME_QUERY } from '../../apollo/queries/queries';
+import PicbyLogo from '../../common/images/PICBY.svg';
 
 const {width: vw} = Dimensions.get('window');
 

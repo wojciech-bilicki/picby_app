@@ -1,14 +1,14 @@
+import { useMutation, useQuery } from '@apollo/react-hooks';
 import React from 'react';
-import {View, ActivityIndicator} from 'react-native';
-
-import {globalStyles} from '../../common/styles/globalStyles';
-import {useStoreActions, useStoreState} from '../../easyPeasy/hooks';
-import {useQuery, useMutation} from '@apollo/react-hooks';
-import {CATALOGS_QUERY} from '../../apollo/queries/queries';
+import { ActivityIndicator, View } from 'react-native';
+import { ADD_CATALOG } from '../../apollo/mutations/mutations';
+import { CATALOGS_QUERY } from '../../apollo/queries/queries';
+import CatalogsRecordsModal from '../../common/components/CatalogsRecordsModal';
+import { globalStyles } from '../../common/styles/globalStyles';
+import { useStoreActions, useStoreState } from '../../easyPeasy/hooks';
 import CatalogEmptyScreen from './CatalogsEmptyView';
 import CatalogsView from './CatalogsView';
-import CatalogsRecordsModal from '../../common/components/CatalogsRecordsModal';
-import {ADD_CATALOG} from '../../apollo/mutations/mutations';
+
 
 const CatalogsScreen: React.FC = props => {
   const {
