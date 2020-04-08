@@ -1,19 +1,23 @@
-import React, {ReactNode, useState} from 'react';
+import React, {ReactNode, useState, useEffect} from 'react';
 import {View, Text, StyleSheet, Dimensions} from 'react-native';
-import {catalogsData, commonColors} from '../../staticData/staticData';
-import {globalStyles} from '../../common/styles/globalStyles';
+import {catalogsData, commonColors} from '../../../staticData/staticData';
+import {globalStyles} from '../../../common/styles/globalStyles';
 import {TouchableOpacity, ScrollView} from 'react-native-gesture-handler';
-import {useStoreState, useStoreActions} from '../../easyPeasy/hooks';
-import CatalogTile from './components/catalogTile/CatalogTile';
-import ModalSettings from './components/modalSettings/ModalSettings';
-import PlusButton from './components/plusButton/PlusButton';
-import CatalogsRecordsModal from '../../common/components/CatalogsRecordsModal';
+import {useStoreState, useStoreActions} from '../../../easyPeasy/hooks';
+import CatalogTile from '../components/catalogTile/CatalogTile';
+import ModalSettings from '../components/modalSettings/ModalSettings';
+import PlusButton from '../components/plusButton/PlusButton';
+import CatalogsRecordsModal from '../../../common/components/CatalogsRecordsModal';
 import {useMutation} from '@apollo/react-hooks';
-import {REMOVE_CATALOG, UPDATE_CATALOG} from '../../apollo/mutations/mutations';
+import {
+  REMOVE_CATALOG,
+  UPDATE_CATALOG,
+} from '../../../apollo/mutations/mutations';
+import {sortCatalogsAlphabetically} from '../CatalogsScreen';
 
 const {width: vw, height: vh} = Dimensions.get('window');
 
-interface userCatalogs {
+export interface userCatalog {
   id: string;
   name: string;
 }
@@ -32,6 +36,8 @@ const CatalogsView: React.FC = props => {
     setSettingsCatalogId,
     setIsEditModalOpen,
     setUpdateNameValue,
+    toggleIsAddNewCatalogModalVisible,
+    setNumberOfUserCatalogs,
   } = useStoreActions(actions => actions.CatalogsModel);
 
   const [deleteCatalog] = useMutation(REMOVE_CATALOG, {
@@ -39,11 +45,11 @@ const CatalogsView: React.FC = props => {
       throw new Error();
     },
     onCompleted: () => {
-      console.log('usunięto');
-      const userCatalogsAfterDelete = userCatalogs.filter(catalog => {
+      const userCatalogsAfterDelete = userCatalogs!.filter(catalog => {
         return catalog.id !== settingsCatalogId;
       });
       setUserCatalogs([...userCatalogsAfterDelete]);
+      setNumberOfUserCatalogs(userCatalogsAfterDelete.length);
       setSettingsCatalogId(undefined);
       setIsDeleteModalOpen(false);
     },
@@ -51,12 +57,15 @@ const CatalogsView: React.FC = props => {
 
   const [updateCatalog] = useMutation(UPDATE_CATALOG, {
     onError: error => {
-      console.log(error, 'line 53');
+      console.log(error);
     },
-    onCompleted: data => {
-      const refreshedCatalog = data;
-      console.log(refreshedCatalog);
-      // setUserCatalogs();
+    onCompleted: async data => {
+      const updatedCatalog = data.updateCatalog;
+      const omitOldCatalog = userCatalogs!.filter(
+        catalog => catalog.id !== updatedCatalog.id,
+      );
+      await setUserCatalogs([...omitOldCatalog, updatedCatalog]);
+      handleCloseEditModal();
     },
   });
 
@@ -80,9 +89,6 @@ const CatalogsView: React.FC = props => {
   };
 
   const handleChangeCatalogName = async () => {
-    console.log(settingsCatalogId, updateNameValue);
-    console.log(typeof settingsCatalogId, typeof updateNameValue);
-
     try {
       await updateCatalog({
         variables: {name: updateNameValue, id: settingsCatalogId},
@@ -92,10 +98,14 @@ const CatalogsView: React.FC = props => {
     }
   };
 
+  useEffect(() => {
+    sortCatalogsAlphabetically(userCatalogs!);
+  }, [userCatalogs]);
+
   return (
     <View style={[globalStyles.screenWrapper]}>
       <ScrollView style={styles.listWrapper}>
-        {(userCatalogs as Array<userCatalogs>).map(element => {
+        {(userCatalogs as Array<userCatalog>).map(element => {
           return (
             <CatalogTile
               name={element.name}
@@ -105,7 +115,9 @@ const CatalogsView: React.FC = props => {
           );
         })}
       </ScrollView>
-      <PlusButton />
+      <PlusButton
+        onPressHandler={() => toggleIsAddNewCatalogModalVisible(true)}
+      />
       <ModalSettings />
       <CatalogsRecordsModal
         isModalVisible={isDeleteModalOpen}

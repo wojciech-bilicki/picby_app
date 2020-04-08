@@ -2,22 +2,20 @@ import * as React from 'react';
 import {StyleSheet, Dimensions, TouchableOpacity, View} from 'react-native';
 import {commonColors} from '../../../../staticData/staticData';
 import PlusIcon from '../../../../common/icons/plus.svg';
-import {useStoreActions} from '../../../../easyPeasy/hooks';
 
-const {darkRed, lightBlue, orangeRed} = commonColors;
+const {orangeRed} = commonColors;
 const {width: vw} = Dimensions.get('window');
 
-const PlusButton = () => {
-  const {toggleIsAddNewCatalogModalVisible} = useStoreActions(
-    actions => actions.CatalogsModel,
-  );
+interface ButtonProps {
+  onPressHandler: any;
+}
+
+const PlusButton = (props: ButtonProps) => {
+  const {onPressHandler} = props;
+
   return (
     <View style={styles.plusIconView}>
-      <TouchableOpacity
-        style={styles.plusIconWrapper}
-        onPress={() => {
-          toggleIsAddNewCatalogModalVisible(true);
-        }}>
+      <TouchableOpacity style={styles.plusIconWrapper} onPress={onPressHandler}>
         <PlusIcon />
       </TouchableOpacity>
     </View>

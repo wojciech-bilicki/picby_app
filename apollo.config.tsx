@@ -1,10 +1,10 @@
-import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
+import {InMemoryCache, NormalizedCacheObject} from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
-import { HttpLink } from 'apollo-link-http';
+import {HttpLink} from 'apollo-link-http';
 
 const cache = new InMemoryCache();
 const link = new HttpLink({
-  uri: 'http://192.168.0.108:8090/graphql',
+  uri: 'http://192.168.8.102:8090/graphql',
   credentials: 'include',
 });
 

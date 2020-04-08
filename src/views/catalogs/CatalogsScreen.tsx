@@ -1,26 +1,32 @@
-import { useMutation, useQuery } from '@apollo/react-hooks';
+import {useMutation, useQuery} from '@apollo/react-hooks';
 import React from 'react';
-import { ActivityIndicator, View } from 'react-native';
-import { ADD_CATALOG } from '../../apollo/mutations/mutations';
-import { CATALOGS_QUERY } from '../../apollo/queries/queries';
+import {ActivityIndicator, View} from 'react-native';
+import {ADD_CATALOG} from '../../apollo/mutations/mutations';
+import {CATALOGS_QUERY} from '../../apollo/queries/queries';
 import CatalogsRecordsModal from '../../common/components/CatalogsRecordsModal';
-import { globalStyles } from '../../common/styles/globalStyles';
-import { useStoreActions, useStoreState } from '../../easyPeasy/hooks';
-import CatalogEmptyScreen from './CatalogsEmptyView';
-import CatalogsView from './CatalogsView';
+import {globalStyles} from '../../common/styles/globalStyles';
+import {useStoreActions, useStoreState} from '../../easyPeasy/hooks';
+import CatalogsView, {userCatalog} from './views/CatalogsView';
+import NoEntriesView, {logoVariants} from './views/NoEntriesView';
+import {catalogsData} from '../../staticData/staticData';
 
+export const sortCatalogsAlphabetically = (userCatalogs: userCatalog[]) => {
+  userCatalogs.sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0));
+};
 
 const CatalogsScreen: React.FC = props => {
   const {
     setUserCatalogs,
     toggleIsAddNewCatalogModalVisible,
     setNewAlbumName,
+    setNumberOfUserCatalogs,
   } = useStoreActions(actions => actions.CatalogsModel);
 
   const {
     userCatalogs,
     isAddNewCatalogModalVisible,
     newAlbumName,
+    numberOfUserCatalogs,
   } = useStoreState(state => state.CatalogsModel);
 
   const [addCatalog] = useMutation(ADD_CATALOG, {
@@ -29,7 +35,7 @@ const CatalogsScreen: React.FC = props => {
     },
     onCompleted: data => {
       const newCatalog = data.addCatalog;
-      setUserCatalogs([...userCatalogs, newCatalog]);
+      setUserCatalogs([...userCatalogs!, newCatalog]);
     },
   });
 
@@ -37,10 +43,11 @@ const CatalogsScreen: React.FC = props => {
     onError: () => {
       console.log(error);
     },
-    onCompleted: data => {
-      console.log(data);
+    onCompleted: async data => {
       const catalogs = data.catalogs;
-      setUserCatalogs(catalogs);
+      await setNumberOfUserCatalogs(catalogs.length);
+      await sortCatalogsAlphabetically(catalogs);
+      await setUserCatalogs(catalogs);
     },
   });
 
@@ -48,6 +55,7 @@ const CatalogsScreen: React.FC = props => {
     if (newAlbumName.length > 1) {
       try {
         await addCatalog({variables: {name: newAlbumName}});
+        await setNumberOfUserCatalogs(userCatalogs!.length + 1);
         setNewAlbumName('');
         toggleIsAddNewCatalogModalVisible(false);
       } catch {
@@ -59,6 +67,8 @@ const CatalogsScreen: React.FC = props => {
     await setNewAlbumName('');
     toggleIsAddNewCatalogModalVisible(false);
   };
+
+  const {title, subtitle} = catalogsData;
 
   return (
     <View style={[globalStyles.screenWrapper]}>
@@ -73,12 +83,21 @@ const CatalogsScreen: React.FC = props => {
         isTextInputVisible={true}
         submitText={'OK'}
       />
-      {loading ? (
-        <ActivityIndicator size={120} />
-      ) : userCatalogs.length ? (
+      {!userCatalogs ? (
+        <ActivityIndicator
+          size={60}
+          style={{marginTop: 60}}
+          color={'#3180AE'}
+        />
+      ) : numberOfUserCatalogs > 0 ? (
         <CatalogsView />
       ) : (
-        <CatalogEmptyScreen />
+        <NoEntriesView
+          plusButtonHandler={() => toggleIsAddNewCatalogModalVisible(true)}
+          title={title}
+          subtitle={subtitle}
+          logoVariant={logoVariants.NoCatalogsIcon}
+        />
       )}
     </View>
   );

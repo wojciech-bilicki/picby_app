@@ -1,4 +1,4 @@
-import { gql } from 'apollo-boost';
+import {gql} from 'apollo-boost';
 
 export const ADD_CATALOG = gql`
   mutation addCatalog($name: String!) {
