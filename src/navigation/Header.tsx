@@ -30,7 +30,6 @@ const Header: React.FC<Props> = props => {
           <ArrowBackIcon style={{minWidth: 24, minHeight: 20}} />
         )}
       </TouchableOpacity>
-
       <Text style={styles.headerText}>{title}</Text>
     </View>
   );

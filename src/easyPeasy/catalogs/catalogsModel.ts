@@ -9,10 +9,11 @@ export interface CatalogsStoreModel {
   isSettingsModalOpen: boolean;
   isDeleteModalOpen: boolean;
   isEditModalOpen: boolean;
-  userCatalogs: userCatalog[] | [];
+  numberOfUserCatalogs: number;
+  userCatalogs: userCatalog[] | [] | undefined;
   toggleIsAddNewCatalogModalVisible: Action<CatalogsStoreModel, boolean>;
   resetCatalogsScreenToDefault: Thunk<CatalogsStoreModel, number>;
-  setUserCatalogs: Action<CatalogsStoreModel, userCatalog[] | []>;
+  setUserCatalogs: Action<CatalogsStoreModel, userCatalog[] | [] | undefined>;
   toggleIsSettingsModalOpen: Action<CatalogsStoreModel, boolean>;
   newAlbumName: string;
   updateNameValue: string;
@@ -22,16 +23,18 @@ export interface CatalogsStoreModel {
   setIsDeleteModalOpen: Action<CatalogsStoreModel, boolean>;
   setUpdateNameValue: Action<CatalogsStoreModel, string>;
   setIsEditModalOpen: Action<CatalogsStoreModel, boolean>;
+  setNumberOfUserCatalogs: Action<CatalogsStoreModel, number>;
 }
 const CatalogsModel: CatalogsStoreModel = {
   isAddNewCatalogModalVisible: false,
   isSettingsModalOpen: false,
   isEditModalOpen: false,
-  userCatalogs: [],
+  userCatalogs: undefined,
   newAlbumName: '',
   updateNameValue: '',
   isDeleteModalOpen: false,
   settingsCatalogId: undefined,
+  numberOfUserCatalogs: 0,
   toggleIsAddNewCatalogModalVisible: action((state, payload) => {
     state.isAddNewCatalogModalVisible = payload;
   }),
@@ -58,6 +61,9 @@ const CatalogsModel: CatalogsStoreModel = {
   }),
   setUpdateNameValue: action((state, payload) => {
     state.updateNameValue = payload;
+  }),
+  setNumberOfUserCatalogs: action((state, payload) => {
+    state.numberOfUserCatalogs = payload;
   }),
 };
 

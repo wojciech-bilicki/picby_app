@@ -1,0 +1,32 @@
+diff --git a/node_modules/react-native-safe-area-view/index.js b/node_modules/react-native-safe-area-view/index.js
+index 0792130..6424c07 100644
+--- a/node_modules/react-native-safe-area-view/index.js
++++ b/node_modules/react-native-safe-area-view/index.js
+@@ -1,15 +1,9 @@
+-import React, { Component } from 'react';
+-import {
+-  Dimensions,
+-  InteractionManager,
+-  Platform,
+-  StyleSheet,
+-  Animated,
+-} from 'react-native';
+ import hoistStatics from 'hoist-non-react-statics';
+-
++import React, { Component } from 'react';
++import { Animated, Dimensions, InteractionManager, Platform, StyleSheet } from 'react-native';
+ import withOrientation from './withOrientation';
+ 
++
+ // See https://mydevice.io/devices/ for device dimensions
+ const X_WIDTH = 375;
+ const X_HEIGHT = 812;
+@@ -189,7 +183,7 @@ class SafeView extends Component {
+ 
+     const { width: WIDTH, height: HEIGHT } = getResolvedDimensions();
+ 
+-    this.view.getNode().measureInWindow((winX, winY, winWidth, winHeight) => {
++    this.view.measureInWindow((winX, winY, winWidth, winHeight) => {
+       if (!this.view) {
+         return;
+       }
