@@ -1,16 +1,15 @@
 import React from 'react';
-import {View, Text, StyleSheet, Dimensions} from 'react-native';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import { globalStyles } from '../../../common/styles/globalStyles';
+import { commonColors } from '../../../staticData/staticData';
+import PlusButton from '../components/plusButton/PlusButton';
 import ManWithBoxLogo from '../icons/man.svg';
 import NoPhotosIcon from '../icons/NoPhotosIcon.svg';
-import {commonColors} from '../../../staticData/staticData';
-import {globalStyles} from '../../../common/styles/globalStyles';
-import PlusButton from '../components/plusButton/PlusButton';
-import {ActionCreator} from 'easy-peasy';
 const {darkRed, lightBlue} = commonColors;
 const {width: vw} = Dimensions.get('window');
 
 interface EmptyScreen {
-  plusButtonHandler: (payload: boolean) => void;
+  plusButtonHandler: () => void;
   title: string;
   subtitle: string;
   logoVariant: logoVariants;
@@ -20,8 +19,7 @@ export enum logoVariants {
   NoPhotosIcon,
   NoCatalogsIcon,
 }
-const NoEntriesView = (props: EmptyScreen) => {
-  const {plusButtonHandler, title, subtitle, logoVariant} = props;
+const NoEntriesView = ({plusButtonHandler, title, subtitle, logoVariant}: EmptyScreen) => {
   return (
     <View style={[globalStyles.screenWrapper]}>
       {logoVariant == logoVariants.NoPhotosIcon ? (

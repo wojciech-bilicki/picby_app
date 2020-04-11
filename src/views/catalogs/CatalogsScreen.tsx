@@ -1,20 +1,17 @@
-import {useMutation, useQuery} from '@apollo/react-hooks';
+import { useMutation, useQuery } from '@apollo/react-hooks';
 import React from 'react';
-import {ActivityIndicator, View} from 'react-native';
-import {ADD_CATALOG} from '../../apollo/mutations/mutations';
-import {CATALOGS_QUERY} from '../../apollo/queries/queries';
+import { ActivityIndicator, View } from 'react-native';
+import { ADD_CATALOG } from '../../apollo/mutations/mutations';
+import { CATALOGS_QUERY } from '../../apollo/queries/queries';
 import CatalogsRecordsModal from '../../common/components/CatalogsRecordsModal';
-import {globalStyles} from '../../common/styles/globalStyles';
-import {useStoreActions, useStoreState} from '../../easyPeasy/hooks';
-import CatalogsView, {userCatalog} from './views/CatalogsView';
-import NoEntriesView, {logoVariants} from './views/NoEntriesView';
-import {catalogsData} from '../../staticData/staticData';
+import { globalStyles } from '../../common/styles/globalStyles';
+import { useStoreActions, useStoreState } from '../../easyPeasy/hooks';
+import { catalogsData } from '../../staticData/staticData';
+import { sortCatalogsAlphabetically } from './catalogs.utils';
+import CatalogsView from './views/CatalogsView';
+import NoEntriesView, { logoVariants } from './views/NoEntriesView';
 
-export const sortCatalogsAlphabetically = (userCatalogs: userCatalog[]) => {
-  userCatalogs.sort((a, b) => (a.name > b.name ? 1 : b.name > a.name ? -1 : 0));
-};
-
-const CatalogsScreen: React.FC = props => {
+const CatalogsScreen: React.FC = () => {
   const {
     setUserCatalogs,
     toggleIsAddNewCatalogModalVisible,

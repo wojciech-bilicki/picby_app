@@ -1,17 +1,16 @@
 import * as React from 'react';
-import {StyleSheet, Dimensions, TouchableOpacity, View} from 'react-native';
-import {commonColors} from '../../../../staticData/staticData';
+import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
 import PlusIcon from '../../../../common/icons/plus.svg';
+import { commonColors } from '../../../../staticData/staticData';
 
 const {orangeRed} = commonColors;
 const {width: vw} = Dimensions.get('window');
 
 interface ButtonProps {
-  onPressHandler: any;
+  onPressHandler: () => void;
 }
 
-const PlusButton = (props: ButtonProps) => {
-  const {onPressHandler} = props;
+const PlusButton = ({onPressHandler}: ButtonProps) => {
 
   return (
     <View style={styles.plusIconView}>

@@ -1,19 +1,15 @@
-import React, {ReactNode, useState, useEffect} from 'react';
-import {View, Text, StyleSheet, Dimensions} from 'react-native';
-import {catalogsData, commonColors} from '../../../staticData/staticData';
-import {globalStyles} from '../../../common/styles/globalStyles';
-import {TouchableOpacity, ScrollView} from 'react-native-gesture-handler';
-import {useStoreState, useStoreActions} from '../../../easyPeasy/hooks';
+import { useMutation } from '@apollo/react-hooks';
+import React, { useEffect } from 'react';
+import { Dimensions, StyleSheet, View } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
+import { REMOVE_CATALOG, UPDATE_CATALOG } from '../../../apollo/mutations/mutations';
+import CatalogsRecordsModal from '../../../common/components/CatalogsRecordsModal';
+import { globalStyles } from '../../../common/styles/globalStyles';
+import { useStoreActions, useStoreState } from '../../../easyPeasy/hooks';
+import { sortCatalogsAlphabetically } from '../catalogs.utils';
 import CatalogTile from '../components/catalogTile/CatalogTile';
 import ModalSettings from '../components/modalSettings/ModalSettings';
 import PlusButton from '../components/plusButton/PlusButton';
-import CatalogsRecordsModal from '../../../common/components/CatalogsRecordsModal';
-import {useMutation} from '@apollo/react-hooks';
-import {
-  REMOVE_CATALOG,
-  UPDATE_CATALOG,
-} from '../../../apollo/mutations/mutations';
-import {sortCatalogsAlphabetically} from '../CatalogsScreen';
 
 const {width: vw, height: vh} = Dimensions.get('window');
 
