@@ -1,6 +1,6 @@
 import {createStackNavigator} from 'react-navigation-stack';
-import LoginScreen from './LoginScreen';
-import RegisterScreen from './RegisterScreen';
+import LoginScreen from './LoginScreena';
+import RegisterScreen from './RegisterScreenTemp';
 import ForgotPasswordScreen from './ForgotPassScreen';
 import ForgotPasswordFormScreen from './ForgotPassFormScreen';
 

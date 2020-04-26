@@ -1,0 +1,353 @@
+import { useMutation } from '@apollo/react-hooks';
+import { Formik } from 'formik';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { ScrollView, TextInput, TouchableOpacity } from 'react-native-gesture-handler';
+import { NavigationStackProp } from 'react-navigation-stack';
+import { CONFIRM_USER, LOGIN_USER } from '../../apollo/mutations/mutations';
+import FlatButton from '../../common/components/Button';
+import PicbyLogo from '../../common/images/PICBY.svg';
+import { globalStyles } from '../../common/styles/globalStyles';
+import { useStoreActions, useStoreState } from '../../easyPeasy/hooks';
+import { buttonsData, inputData, introHeaderText, loginMessages, userLoginErrorCodes } from '../../staticData/staticData';
+import PopUp from './components/Popup';
+import GotAccountQuestion from './components/GotAccountQuestion';
+import { ENABLE_BUTTONS_DELAY_TIME, useHandlePopupAnimation } from './hooks/useHandlePopupAnimation';
+import EmailLogo from './icons/envelope.svg';
+import ErrorLogo from './icons/exclamationMark.svg';
+import KeyLogo from './icons/key.svg';
+
+
+
+
+type LoginScreenProps = {
+  navigation: NavigationStackProp;
+};
+
+interface handleLoginRequest extends CredentialTypes {
+  resetForm: () => void;
+}
+
+interface CredentialTypes {
+  email: string;
+  password: string;
+}
+
+interface ActionTypes {
+  resetForm: () => void;
+}
+
+type userTokenType = string | undefined;
+
+const LoginScreen: React.FC<LoginScreenProps> = ({navigation}) => {
+  const {navigate} = navigation;
+  const {badEmailOrPasswordCode, userNotConfirmedCode} = userLoginErrorCodes;
+  const {loginHeaderTextTwo, loginHeaderTextOne} = introHeaderText;
+
+  const {
+    messageBadEmail,
+    messageBadPassword,
+    messageLoginSuccess,
+    forgotPasswordText,
+    messageServerError,
+    messageEmailConfirmation,
+    messageUserNotConfirmed,
+  } = loginMessages;
+
+  const {placeholderTextBlueColor} = inputData;
+
+  const {
+    loginText,
+    loginWithGoogle,
+    textColorBlue,
+    textColorWhite,
+  } = buttonsData;
+
+  const [userTokenValue, setUserTokenValue] = useState<userTokenType>(
+    undefined,
+  );
+  const {handlePopUpAnimation, fadeAnim} = useHandlePopupAnimation();
+
+  const {
+    setIsUserNotConfirmed,
+    setIsServerNotResponding,
+    setIsLoginSuccess,
+    setIsPasswordBad,
+    setAreLoginButtonsDisabled,
+    setIsUserConfirmedSuccess,
+    setLoginScreenStateToDefault,
+    setMessagePopUpText,
+  } = useStoreActions(actions => actions.LoginModel);
+
+  const {
+    isLoginSuccess,
+    isServerNotResponding,
+    isPasswordBad,
+    isUserConfirmedSuccess,
+    isUserNotConfirmed,
+    areLoginButtonsDisabled,
+    messagePopUpText,
+  } = useStoreState(state => state.LoginModel);
+
+
+  const [confirmUser] = useMutation(CONFIRM_USER, {
+    onError: errorData => {
+      const [extensions] = errorData.graphQLErrors;
+      const errorCode = extensions?.extensions?.exception.code;
+      throw new Error(errorCode);
+    },
+  });
+
+  const redirectToFirstLoginDashboard = () => {
+    navigation.dangerouslyGetParent()?.navigate('FirstLogin');
+  };
+
+  const loginGraphQLQuery = async ({email, password}: CredentialTypes) => {
+    const emailLowerCase = email.toLowerCase();
+
+    try {
+      await loginUser({variables: {email: emailLowerCase, password}});
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  };
+
+  const handleLoginRequestAndErrors = async ({
+    email,
+    password,
+    resetForm,
+  }: handleLoginRequest) => {
+    try {
+      setAreLoginButtonsDisabled(true);
+      await setIsServerNotResponding(false);
+      await loginGraphQLQuery({email, password});
+      setIsLoginSuccess(true);
+      resetForm();
+    } catch (error) {
+      let errorCode = error.message;
+      if (errorCode == badEmailOrPasswordCode) {
+        setIsPasswordBad(true);
+      } else if (errorCode == userNotConfirmedCode) {
+        setIsUserNotConfirmed(true);
+      } else setIsServerNotResponding(true);
+    } finally {
+      setIsLoginSuccess(false);
+      setIsServerNotResponding(false);
+      setIsUserNotConfirmed(false);
+    }
+  };
+
+  const handleFormSubmit = async (
+    values: CredentialTypes,
+    actions: ActionTypes,
+  ) => {
+    const {email, password} = values;
+    const {resetForm} = actions;
+    await handleLoginRequestAndErrors({email, password, resetForm});
+  };
+
+  const confirmUserGraphQLQuery = async (userToken: string) => {
+    try {
+      await confirmUser({variables: {token: userToken}});
+    } catch (error) {
+      throw new Error(error);
+    }
+  };
+
+  const handleConfirmUserAndHandleErrors = async (userToken: string) => {
+    try {
+      setAreLoginButtonsDisabled(true);
+      await setIsServerNotResponding(false);
+      await confirmUserGraphQLQuery(userToken);
+      setIsUserConfirmedSuccess(true);
+    } catch (error) {
+      setIsServerNotResponding(true);
+    } finally {
+      setIsServerNotResponding(false);
+      setTimeout(
+        () => setAreLoginButtonsDisabled(false),
+        ENABLE_BUTTONS_DELAY_TIME,
+      );
+    }
+  };
+
+ 
+
+  useEffect(() => {
+    navigation.addListener('didBlur', () => setLoginScreenStateToDefault(true));
+  }, []);
+
+  useEffect(() => {
+    const userToken: userTokenType = navigation.getParam('token');
+    userToken && setUserTokenValue(userToken);
+  });
+
+  useEffect(() => {
+    userTokenValue && handleConfirmUserAndHandleErrors(userTokenValue);
+  }, [userTokenValue]);
+
+  useEffect(() => {
+    if (isServerNotResponding) {
+      setMessagePopUpText(messageServerError);
+      handlePopUpAnimation();
+    }
+  }, [isServerNotResponding]);
+
+  useEffect(() => {
+    if (isLoginSuccess) {
+      setMessagePopUpText(messageLoginSuccess);
+      handlePopUpAnimation(redirectToFirstLoginDashboard);
+    }
+  }, [isLoginSuccess]);
+
+  useEffect(() => {
+    if (isUserConfirmedSuccess) {
+      setMessagePopUpText(messageEmailConfirmation);
+      handlePopUpAnimation();
+    }
+  }, [isUserConfirmedSuccess]);
+
+  useEffect(() => {
+    if (isUserNotConfirmed) {
+      setMessagePopUpText(messageUserNotConfirmed);
+      handlePopUpAnimation();
+    }
+  }, [isUserNotConfirmed]);
+
+  const navigateToOtherScreen = (screenName: string) => {
+    navigation.navigate({routeName: screenName});
+  };
+  return (
+    <ScrollView>
+      
+        <View style={globalStyles.screenWrapper}>
+          <PopUp popUpText={messagePopUpText} fadeAnim={fadeAnim} />
+         
+          <PicbyLogo style={styles.logo} />
+          <View>
+            <Formik
+              enableReinitialize={true}
+              validationSchema={reviewSchema}
+              initialValues={{email: '', password: ''}}
+              onSubmit={(values, actions) => {
+                handleFormSubmit(values, actions);
+              }}>
+              {formikProps => (
+                <View>
+                  <View style={styles.inputWrapper}>
+                    <EmailLogo style={globalStyles.emailLogo} />
+                    <TextInput
+                      keyboardType="email-address"
+                      style={globalStyles.input}
+                      placeholder="E-mail"
+                      placeholderTextColor={placeholderTextBlueColor}
+                      onChangeText={formikProps.handleChange('email')}
+                      value={formikProps.values.email}
+                      onBlur={formikProps.handleBlur('email')}
+                    />
+                  </View>
+                  <View style={globalStyles.errorTextWrapper}>
+                    {formikProps.touched.email && formikProps.errors.email && (
+                      <ErrorLogo style={globalStyles.errorExclamationMark} />
+                    )}
+                    <Text style={globalStyles.errorText}>
+                      {formikProps.touched.email &&
+                        formikProps.errors.email &&
+                        messageBadEmail}
+                    </Text>
+                  </View>
+                  <View style={styles.inputWrapper}>
+                    <KeyLogo style={globalStyles.keyLogo} />
+                    <TextInput
+                      secureTextEntry={true}
+                      style={globalStyles.input}
+                      placeholder="Hasło"
+                      placeholderTextColor={placeholderTextBlueColor}
+                      onChangeText={formikProps.handleChange('password')}
+                      value={formikProps.values.password}
+                      onBlur={formikProps.handleBlur('password')}
+                      onFocus={() => {
+                        if (isPasswordBad) {
+                          setIsPasswordBad(false);
+                          setAreLoginButtonsDisabled(false);
+                        }
+                      }}
+                    />
+                  </View>
+                  <View style={globalStyles.errorTextWrapper}>
+                    {isPasswordBad && (
+                      <ErrorLogo style={globalStyles.errorExclamationMark} />
+                    )}
+                    <Text style={globalStyles.errorText}>
+                      {isPasswordBad && messageBadPassword}
+                    </Text>
+                  </View>
+
+                  <View style={styles.googleButtonWrapper}>
+                    <FlatButton
+                      onPress={() => navigate('ForgotPassForm')}
+                      colorVariantIndex={1}
+                      label={loginWithGoogle}
+                      textColor={textColorBlue}
+                      icon={true}
+                      disabled={areLoginButtonsDisabled}
+                      googleButton={true}
+                    />
+                  </View>
+                  <FlatButton
+                    onPress={formikProps.handleSubmit}
+                    colorVariantIndex={0}
+                    label={loginText}
+                    textColor={textColorWhite}
+                    disabled={areLoginButtonsDisabled}
+                  />
+                </View>
+              )}
+            </Formik>
+          </View>
+          <TouchableOpacity onPress={() => navigate('ForgotPass')}>
+            <Text style={styles.forgotPassword}>{forgotPasswordText}</Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableWithoutFeedback>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  gotAccountQuestion: {
+    alignSelf: 'flex-start',
+    marginLeft: 0.1 * vw,
+    marginTop: 0.05 * vw,
+  },
+  logo: {
+    minWidth: 0.65 * vw,
+    minHeight: 0.21 * vw,
+    resizeMode: 'contain',
+    marginTop: 0.2187 * vw,
+    marginBottom: 0.2187 * vw,
+  },
+  inputWrapper: {
+    height: 0.093 * vw,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomColor: 'rgba(242, 143, 174, 0.68)',
+    borderBottomWidth: 2,
+    borderRadius: 0,
+    textAlign: 'center',
+    paddingHorizontal: 5,
+    width: vw * 0.8,
+  },
+  googleButtonWrapper: {
+    marginTop: vw * 0.0625,
+    marginBottom: vw * 0.05,
+  },
+  forgotPassword: {
+    textDecorationLine: 'underline',
+    color: '#000',
+    marginTop: 0.04 * vw,
+  },
+});
+
+export default LoginScreen;

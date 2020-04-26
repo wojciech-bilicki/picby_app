@@ -1,14 +1,9 @@
 import React from 'react';
-import {View, Text, StyleSheet, Dimensions} from 'react-native';
-import {
-  firstLoginDashboard,
-  buttonsData,
-  commonColors,
-} from '../../staticData/staticData';
-import PicbyLogo from '../../common/images/PICBY.svg';
-import {globalStyles} from '../../common/styles/globalStyles';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import FlatButton from '../../common/components/Button';
-import {NavigationStackProp} from 'react-navigation-stack';
+import PicbyLogo from '../../common/images/PICBY.svg';
+import { globalStyles } from '../../common/styles/globalStyles';
+import { buttonsData, commonColors, firstLoginDashboard } from '../../staticData/staticData';
 
 const {width: vw} = Dimensions.get('window');
 const {orangeRed, lightBlue} = commonColors;
@@ -38,7 +33,7 @@ const DashboardScreen: React.FC<LoginScreenProps> = ({navigation}) => {
       <FlatButton
         textColor={textColorWhite}
         onPress={() => navigate('Settings')}
-        textValue={buttonText}
+        label={buttonText}
         colorVariantIndex={0}
       />
     </View>

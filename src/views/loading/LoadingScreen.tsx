@@ -1,16 +1,9 @@
-import {useQuery} from '@apollo/react-hooks';
+import { useQuery } from '@apollo/react-hooks';
 import React from 'react';
-import {
-  ActivityIndicator,
-  Dimensions,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import {NavigationStackProp} from 'react-navigation-stack';
+import { ActivityIndicator, Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { NavigationStackProp } from 'react-navigation-stack';
 import client from '../../../apollo.config';
-import {ME_QUERY} from '../../apollo/queries/queries';
+import { ME_QUERY } from '../../apollo/queries/queries';
 import PicbyLogo from '../../common/images/PICBY.svg';
 
 const {width: vw} = Dimensions.get('window');
@@ -30,6 +23,7 @@ const LoadingScreen: React.FC<Props> = ({navigation}) => {
     },
     onCompleted: () => {
       const userId = data?.me;
+      console.log(userId)
       if (userId) {
         navigateToOtherScreen('Catalogs');
       } else {
@@ -47,9 +41,9 @@ const LoadingScreen: React.FC<Props> = ({navigation}) => {
           </Text>
           <PicbyLogo style={[styles.logo, styles.logoThirdScreen]} />
         </View>
-        <View style={styles.content}>
+        {loading &&<View style={styles.content}>
           <ActivityIndicator size={120} color={'#3180AE'} />
-        </View>
+        </View>}
       </View>
     </ScrollView>
   );

@@ -1,16 +1,16 @@
 import React from 'react';
-import {StyleSheet, TouchableOpacity, Text, Dimensions} from 'react-native';
+import { Dimensions, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import { buttonsData } from '../../staticData/staticData';
 import GoogleIcon from '../../views/auth/icons/googleIcon.svg';
-import {buttonsData} from '../../staticData/staticData';
 
 let {width: vw} = Dimensions.get('window');
 
 interface ButtonProps {
   onPress: () => void;
   colorVariantIndex: number;
-  textColor: object;
-  textValue: string;
+  textColor?: object;
+  label: string;
   icon?: boolean;
   disabled?: boolean;
   googleButton?: boolean;
@@ -18,10 +18,10 @@ interface ButtonProps {
 
 const FlatButton: React.FC<ButtonProps> = props => {
   const {
-    textValue,
+    label: textValue,
     onPress,
     colorVariantIndex,
-    textColor,
+    textColor = "white",
     icon = false,
     disabled = false,
     googleButton = false,

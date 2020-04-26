@@ -82,14 +82,14 @@ const Introduction: React.FC<Props> = ({
         </View>
         <View style={styles.buttonsWrapper}>
           <FlatButton
-            textValue={registerText}
+            label={registerText}
             onPress={() => navigateToOtherScreen('Register')}
             colorVariantIndex={0}
             textColor={textColorWhite}
           />
           <View style={styles.singleButtonWrapper}>
             <FlatButton
-              textValue={loginText}
+              label={loginText}
               onPress={() => navigateToOtherScreen('Login')}
               colorVariantIndex={0}
               textColor={textColorWhite}

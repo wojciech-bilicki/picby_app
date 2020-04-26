@@ -1,4 +1,4 @@
-import {gql} from 'apollo-boost';
+import { gql } from 'apollo-boost';
 
 export const HELLO_QUERY = gql`
   query hello {
@@ -10,10 +10,6 @@ export const ME_QUERY = gql`
   query me {
     me {
       id
-      email
-      catalogs {
-        id
-      }
     }
   }
 `;

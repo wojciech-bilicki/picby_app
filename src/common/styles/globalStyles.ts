@@ -24,7 +24,7 @@ export const globalStyles = StyleSheet.create({
     minHeight: 0.0625 * vw,
     paddingHorizontal: 2,
   },
-  errorExlamationMark: {
+  errorExclamationMark: {
     maxWidth: 0.0625 * vw,
     maxHeight: 0.0625 * vw,
     marginRight: 0.063 * vw,

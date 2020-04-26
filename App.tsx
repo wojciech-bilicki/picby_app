@@ -1,20 +1,45 @@
+import { ApolloProvider } from '@apollo/react-hooks';
+import { createStore } from 'easy-peasy';
 import React from 'react';
+import client from './apollo.config';
+import model from './src/easyPeasy/rootModel';
 import AppContainer from './src/navigation/rootNavFlow';
 
-import client from './apollo.config';
-import {ApolloProvider} from '@apollo/react-hooks';
-import {StoreProvider, createStore} from 'easy-peasy';
-import model from './src/easyPeasy/rootModel';
 
 const prefix = 'https://hungry-kilby-128f75.netlify.com/';
 const store = createStore(model);
 
+/* tslint:disable */ 
+global.XMLHttpRequest = global.originalXMLHttpRequest
+  ? global.originalXMLHttpRequest
+  : global.XMLHttpRequest;
+global.FormData = global.originalFormData
+  ? global.originalFormData
+  : global.FormData;
+
+fetch; // Ensure to get the lazy property
+
+if (window.__FETCH_SUPPORT__) {
+  // it's RNDebugger only to have
+  window.__FETCH_SUPPORT__.blob = false;
+} else {
+  /*
+   * Set __FETCH_SUPPORT__ to false is just work for `fetch`.
+   * If you're using another way you can just use the native Blob and remove the `else` statement
+   */
+  global.Blob = global.originalBlob ? global.originalBlob : global.Blob;
+  global.FileReader = global.originalFileReader
+    ? global.originalFileReader
+    : global.FileReader;
+}
+
+
 const App = () => {
   return (
     <ApolloProvider client={client}>
-      <StoreProvider store={store}>
-        <AppContainer uriPrefix={prefix} />
-      </StoreProvider>
+      {/* <StoreProvider store={store}> */}
+        <AppContainer />
+      {/* </StoreProvider> */}
     </ApolloProvider>
   );
 };

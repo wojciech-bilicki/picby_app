@@ -199,7 +199,7 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
                         {(formikProps.touched.email &&
                           formikProps.errors.email) ||
                         isEmailNotFound ? (
-                          <ErrorLogo style={globalStyles.errorExlamationMark} />
+                          <ErrorLogo style={globalStyles.errorExclamationMark} />
                         ) : null}
                         <Text style={globalStyles.errorText}>
                           {formikProps.touched.email &&
@@ -210,7 +210,7 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
                       </View>
                       <View style={styles.buttonsWrapper}>
                         <FlatButton
-                          textValue={sendText}
+                          label={sendText}
                           onPress={formikProps.handleSubmit}
                           colorVariantIndex={0}
                           textColor={textColorWhite}
@@ -218,7 +218,7 @@ const ForgotPasswordScreen: React.FC<Props> = ({navigation}) => {
                         />
                         <View style={styles.singleButtonWrapper}>
                           <FlatButton
-                            textValue={goBackText}
+                            label={goBackText}
                             onPress={() => navigate('Login')}
                             colorVariantIndex={2}
                             textColor={textColorBlue}

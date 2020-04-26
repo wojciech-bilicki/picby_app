@@ -101,12 +101,12 @@ const CatalogsView: React.FC = props => {
   return (
     <View style={[globalStyles.screenWrapper]}>
       <ScrollView style={styles.listWrapper}>
-        {(userCatalogs as Array<userCatalog>).map(element => {
+        {(userCatalogs as Array<userCatalog>).map(catalog => {
           return (
             <CatalogTile
-              name={element.name}
-              id={element.id}
-              key={Math.random()}
+              name={catalog.name}
+              id={catalog.id}
+              key={catalog.id}
             />
           );
         })}
@@ -120,19 +120,19 @@ const CatalogsView: React.FC = props => {
         setIsModalVisible={setIsDeleteModalOpen}
         submitFunction={handleDeleteCatalog}
         cancelFunction={handleCloseDeleteModal}
-        contentText={'Czy na pewno chcesz usunąć ten katalog?'}
-        headerText={'Usuń katalog'}
+        contentText='Czy na pewno chcesz usunąć ten katalog?'
+        headerText='Usuń katalog'
         isTextInputVisible={false}
-        submitText={'USUŃ'}
+        submitText='USUŃ'
       />
       <CatalogsRecordsModal
         isModalVisible={isEditModalOpen}
         setIsModalVisible={setIsEditModalOpen}
         submitFunction={handleChangeCatalogName}
         cancelFunction={handleCloseEditModal}
-        headerText={'Zmień nazwę katalogu'}
+        headerText='Zmień nazwę katalogu'
         isTextInputVisible={true}
-        submitText={'OK'}
+        submitText='OK'
         inputValue={updateNameValue}
         setInputValue={setUpdateNameValue}
       />

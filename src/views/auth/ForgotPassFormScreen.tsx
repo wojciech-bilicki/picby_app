@@ -209,7 +209,7 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
                       <View style={globalStyles.errorTextWrapper}>
                         {formikProps.touched.password &&
                         formikProps.errors.password ? (
-                          <ErrorLogo style={globalStyles.errorExlamationMark} />
+                          <ErrorLogo style={globalStyles.errorExclamationMark} />
                         ) : null}
                         <Text style={globalStyles.errorText}>
                           {formikProps.touched.password &&
@@ -249,7 +249,7 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
                       <View style={globalStyles.errorTextWrapper}>
                         {formikProps.touched.passwordRepeat &&
                         formikProps.errors.passwordRepeat ? (
-                          <ErrorLogo style={globalStyles.errorExlamationMark} />
+                          <ErrorLogo style={globalStyles.errorExclamationMark} />
                         ) : null}
                         <Text style={globalStyles.errorText}>
                           {formikProps.touched.passwordRepeat &&
@@ -259,7 +259,7 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
                       </View>
                       <View style={styles.buttonsWrapper}>
                         <FlatButton
-                          textValue={sendText}
+                          label={sendText}
                           onPress={formikProps.handleSubmit}
                           colorVariantIndex={0}
                           textColor={textColorWhite}
@@ -267,7 +267,7 @@ const ForgotPasswordFormScreen: React.FC<Props> = ({navigation}) => {
                         />
                         <View style={styles.singleButtonWrapper}>
                           <FlatButton
-                            textValue={goBackText}
+                            label={goBackText}
                             onPress={() => navigate('Login')}
                             colorVariantIndex={2}
                             textColor={textColorBlue}

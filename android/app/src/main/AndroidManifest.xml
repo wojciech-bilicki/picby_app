@@ -30,7 +30,6 @@
           
           <data android:scheme="https"
                 android:host="hungry-kilby-128f75.netlify.com"
-                pathPattern="/login/..*"
                 />
         </intent-filter>
       </activity>
